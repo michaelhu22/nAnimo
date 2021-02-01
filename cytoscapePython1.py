@@ -226,28 +226,6 @@ def predictTimes(networks):
     predictedTimes = pd.DataFrame(a,columns = ['seconds'])
     return predictedTimes
 
-# importNetworks takes a dictionary of time keys and network values, and sends the networks to cytoscape in order.
-# network sending is delayed between networks based on the times keys of each network. toJpeg is a boolean value which
-# decides whether or not to send each frame to a jpeg file
-def importNetworks(networks, toJpeg):
-    """
-    Sends
-    """
-    timeKeys = list(networks.keys())
-    for x in range (len(networks)):
-        if x == 0:
-            time.sleep(timeKeys[0])
-        nodes = addSpringCoords(networks[timeKeys[x]], 500)
-        edges = convertEdge(networks[timeKeys[x]])
-        toCytoscape(nodes, edges)
-#         buffering to keep up with cytoscape lag. this will make the times less accurate.
-        time.sleep(0.3)
-        cytoscape.view.fit_content()
-        if (x<len(networks)-1):
-            time.sleep(timeKeys[x+1]-timeKeys[x])
-# In[173]:
-
-
 def createFrames(df1, df2, columnName, frames):
     """
     Returns a DataFrame of node rows and frame columns. 
