@@ -1,56 +1,31 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
-
-
 from py2cytoscape import cyrest
 import networkx as nx
 import numpy as np
 import pandas as pd
 import random
 import time
+import tempfile
 from networkx.generators.random_graphs import barabasi_albert_graph as ba
 
 
-# In[2]:
-
-
-cytoscape =  cyrest.cyclient()
-
-
-# In[3]:
-
-
-cytoscape.status()
-
-
-# In[4]:
-
-
-from py2cytoscape.data.cyrest_client import CyRestClient
-cy = CyRestClient()
-
-
-# In[5]:
-
-
-cy.session.delete()
-
-
-# In[6]:
-
-
-cytoscape.session.open(session_file = "C:\\Users\\micha\\code\\cytoscape_code\\template.cys")
-
-
-# In[7]:
-
-
-# generateNetworks takes a num, d, n and time. returns a dictionary of num length, with keys being randomly generated
-# in the range of 0 to time. values are random networks with n nodes with degree d 
-def generateNetworks(num, degree, nodes, time):
-    ret = {}
+def generateNetworks(num, d, n, time):
+    """
+    Returns a dictionary of elements time:network
+    
+    Parameters:
+        num (int): Number of networks generated
+        d (int): Degree of each node in the networks
+        n (int): Number of nodes in each network
+        time (int): Total time of the dictionary
+        
+    Returns:
+        networkDict (dict): Dictionary of {time:network} of num length. Keys range from 0 to time, in acending order.
+        Values are randomly generated networks with n nodes, each node with d degree.
+    """
+    networkDict = {}
     times = []
     for i in range (num):
         rand = random.random()*time
@@ -60,60 +35,90 @@ def generateNetworks(num, degree, nodes, time):
     times[num-1] = time
     times.sort()
     for i in range (num):
-        ret[times[i]] = nx.random_regular_graph(degree,nodes)
-    return ret
+        networkDict[times[i]] = nx.random_regular_graph(d,n)
+    return networkDict
+
+# In[165]:
 
 
-# In[8]:
-
-
-# addNodeAttributes takes and nx network, attribute name, and value. it adds an attribute to all the nodes with value 
-# value. used to test graphs with more node data than x/y coords.
 def addNodeAttributes (network, attribute, value):
+    """
+    Adds an attribute to all nodes in a networkX network
+    
+    Parmeters:
+        network (networkx.classes.graph.Graph): networkX graph to have node attributes added
+        attribute (str): Name of attribute category
+        value (str): Value of each attribute
+    """
     for x in range (len(network.nodes())):
         nx.set_node_attributes(network, {x:value}, attribute)
 
 
-# In[9]:
+# In[166]:
 
 
-#convertEdge takes a Networkx network and returns a DataFrame with the edge data. Rows edges, columns of source/sink/data
-def convertEdge (nx):
-    nxEdges = nx.edges(data = True)
+def convertEdge (network):
+    """
+    Return a DataFrame of readable edge data from a networkX graph
+    
+    Parameters:
+        network (networkx.classes.graph.Graph): A networkX graph with edges
+        
+    Returns:
+        edges (DataFrame): DataFrame of readable edge data, sorted by source node values
+    """
+    networkEdges = network.edges(data = True)
     d = {'source':[], 'target':[]}
-    for i in nxEdges:
+    for i in networkEdges:
         d['source'].append(i[0])
         d['target'].append(i[1])
-    columns = list((list(nxEdges)[0][2]).keys())
+    columns = list((list(networkEdges)[0][2]).keys())
     for i in range (len(columns)):
-        d[columns[i]] = [x[2][columns[i]] for x in nxEdges]
-    ret = pd.DataFrame(d)
-    ret.sort_values('source')
-    return ret
+        d[columns[i]] = [x[2][columns[i]] for x in networkEdges]
+    edges = pd.DataFrame(d)
+    edges.sort_values('source')
+    return edges
 
 
-# In[10]:
+# In[167]:
 
 
-# convertNode takes a Networkx graph and returns a Dataframe with node data. Rows of nodes, columns of name/data
-def convertNode (nx):
-    nxNodes = nx.nodes(data = True)
-    keys = list(dict(nxNodes).keys())
-    values = list(dict(nxNodes).values())
-    ret = pd.DataFrame(values, index = keys)
-    return ret
+def convertNode (network):
+    """
+    Returns a DataFrame of readable node data from a networkX graph
+    
+    Parameters:
+        network (networkx.classes.graph.Graph): A networkX graph with nodes
+        
+    Returns:
+        nodes (DataFrame): DataFrame of readable node data
+    """
+    networkNodes = network.nodes(data = True)
+    keys = list(dict(networkNodes).keys())
+    values = list(dict(networkNodes).values())
+    nodes = pd.DataFrame(values, index = keys)
+    nodes.sort_index()
+    return nodes
 
 
-# In[11]:
+# In[168]:
 
 
-# addSpringCoords take a Networkx Graph and a spread variable, and returns a DataFrame with the node data, as well as
-# x and y columns with spring layout coordinates for each node. each coordinate is simply multiplied by the spread for 
-# better visibility in cytoscape
-def addSpringCoords (nxgraph,spread):
-    nodeData = convertNode(nxgraph)
+def addSpringCoords (network,spread):
+    """
+    Returns a DataFrame of node data from a networkX graph, with additional x and y columns of spring layout coordinates
+    for each node
+    
+    Parameters:
+        network (networkx.classes.graph.Graph): A networkX graph with nodes
+        spread (int): Space between nodes
+        
+    Returns:
+        nodes(DataFrame): A DataFrame of nx's node data with additional x/y columns for coordinates
+    """
+    nodeData = convertNode(network)
 #     using networkx spring_layout function
-    coords = nx.spring_layout(nxgraph)
+    coords = nx.spring_layout(network)
     for i in range (len(coords)):
         for j in range (2):
             coords[i][j] = int(coords[i][j]*spread)
@@ -121,17 +126,25 @@ def addSpringCoords (nxgraph,spread):
     df = pd.DataFrame(arr, columns = ['x', 'y'])
     nodeData['x'] = df['x']
     nodeData['y'] = df['y']
-    ret =  pd.DataFrame(nodeData)
-    ret = ret.sort_index()
-    return ret
+    nodes =  pd.DataFrame(nodeData)
+    nodes = nodes.sort_index()
+    return nodes
 
 
-# In[12]:
+# In[169]:
 
 
-# importNodeCoords imports node data from a DataFrame
 def importNode(nodes):
-    nodes.to_csv('C:/Users/micha/code/cytoscape_code/jn/data/nodeData.csv')
+    """
+    Sends node data to cytoscape from a DataFrame
+    
+    Parameters:
+        nodes(DataFrame): A DataFrame with node data to be imported
+        
+    *Cytoscape requires network to already exist, or else importing node data will not work.
+     Use cytoscape.network.create_empty() or importEdge() prior if receiving error.
+    """
+    nodes.to_csv('data/nodeData.csv')
     cytoscape.table.import_file(
         keyColumnIndex = "1",
         startLoadRow = "0",
@@ -140,12 +153,19 @@ def importNode(nodes):
         afile = 'C:/Users/micha/code/cytoscape_code/jn/data/nodeData.csv')
 
 
-# In[13]:
+# In[170]:
 
 
-# importEdge takes a DataFrame and imports into cytoscape
 def importEdge(edges):
-    edges.to_csv('C:/Users/micha/code/cytoscape_code/jn/data/edgeData.csv')
+    """
+    Sends edge data to cytoscape from a DataFrame
+    
+    Parameters:
+        edges(DataFrame): A DataFrame with edge data to be imported
+        
+    *Will create a new network in Cytoscape instead of overwriting current network
+    """
+    edges.to_csv('data/edgeData.csv')
     cytoscape.network.import_file(
         indexColumnSourceInteraction="2",
         indexColumnTargetInteraction ="3",
@@ -155,13 +175,21 @@ def importEdge(edges):
     time.sleep(0.1)
 
 
-# In[14]:
+# In[171]:
 
 
-# toCytoscape takes a NetoworkX graph and sends it to cytroscape with spring directed layout.
 def toCytoscape(nodes, edges):
-    edges.to_csv('C:/Users/micha/code/cytoscape_code/jn/data/edgeData.csv')
-    nodes.to_csv('C:/Users/micha/code/cytoscape_code/jn/data/nodeData.csv')
+    """
+    Sends node and edge data to cytoscape from DataFrames
+    
+    Parameters:
+        nodes(DataFrame): A DataFrame with node data to be imported
+        edges(DataFrame): A DataFrame with edge data to be imported
+        
+    *Will create a new network in Cytoscape instead of overwriting current network
+    """
+    edges.to_csv('data/edgeData.csv')
+    nodes.to_csv('data/nodeData.csv')
     
     cytoscape.network.import_file(
         indexColumnSourceInteraction="2",
@@ -178,12 +206,19 @@ def toCytoscape(nodes, edges):
         afile = 'C:/Users/micha/code/cytoscape_code/jn/data/nodeData.csv')
 
 
-# In[15]:
+# In[172]:
 
 
-# predictTimes takes a dictionary of time:networks and returns a dataFrame of how many seconds between networks
-# numbers indicate how much between prev network an current network (time next to 0 actually should be 0 in this case, need fix)
 def predictTimes(networks):
+    """
+    Returns a DataFrame of times between networks based on the time keys of a time:network dictionary
+    
+    Parameters:
+        networks (dict): Dictionary of time:network elements
+        
+    Returns:
+        predictedTimes (DataFrame): Column of integers that represent time between networks
+    """
     keys = list(networks.keys())
     a = [keys[0]]
     for x in range (len(networks)-1):
@@ -191,14 +226,13 @@ def predictTimes(networks):
     predictedTimes = pd.DataFrame(a,columns = ['seconds'])
     return predictedTimes
 
-
-# In[16]:
-
-
 # importNetworks takes a dictionary of time keys and network values, and sends the networks to cytoscape in order.
 # network sending is delayed between networks based on the times keys of each network. toJpeg is a boolean value which
 # decides whether or not to send each frame to a jpeg file
 def importNetworks(networks, toJpeg):
+    """
+    Sends
+    """
     timeKeys = list(networks.keys())
     for x in range (len(networks)):
         if x == 0:
@@ -211,20 +245,24 @@ def importNetworks(networks, toJpeg):
         cytoscape.view.fit_content()
         if (x<len(networks)-1):
             time.sleep(timeKeys[x+1]-timeKeys[x])
+# In[173]:
 
 
-# In[17]:
-
-
-# importNetworks(networks, True)
-
-
-# In[18]:
-
-
-# createFrames takes two DataFrames with the same length, shared column name, and number of frames, and returns a 
-# DataFrame with frames number of columns.
 def createFrames(df1, df2, columnName, frames):
+    """
+    Returns a DataFrame of node rows and frame columns. 
+    
+    Parameters:
+        df1 (DataFrame): DataFrame containing coordinate data of starting frame
+        df2 (DataFrame): DataFrame containing coordinate data of ending frame, with same length as df1
+        columnName (str): Name of column that contains x or y data in both DataFrames (must be a shared column name in both DataFrames)
+        frames (int): total number of frames between starting and ending coordinates
+        
+    Returns:
+        coords (DataFrame): DataFrame with nod rows and frame columns, with evenly spaced coordinates between each frame
+        
+    *Remember to use this twice, once for x and once for y coordinates.
+    """
 #     preserve node order
     df1 = df1.sort_index()
     df2 = df2.sort_index()
@@ -256,13 +294,20 @@ def createFrames(df1, df2, columnName, frames):
     return coords
 
 
-# In[19]:
+# In[174]:
 
 
-# playFrames takes two dataFrames with each column as coordinates frames and each row as nodes. it sends node coordinates
-# to cytoscape with a 0.6 second delay between each, to keep up with Cytoscape lag. if export == True, it will export each frame as a jpeg file. startIndex
-# is an integer where playFrames will start naming the jpeg files.
 def playFrames(xFrames, yFrames, export, startIndex):
+    """
+    Plays frames into Cytoscape from DataFrames with node# rows and frame# columns.
+    
+    Parameters:
+        xFrames (DataFrame): DataFrame of node# rows and frame# columns of x coordinate data
+        yFrames (DataFrame): DataFrame of node# rows and frame# columns of y coordinate data
+        export (bool): If export == True, playFrames will export every frame from Cytoscape as a .jpeg
+        startIndex (int): Starting index of named image files (creates no naming overlap if running playFrames multiple times for the same image folder)
+    """
+    
     temp = pd.DataFrame()
     
 #     copying each frames x/y coordinates to temp and importing them (could possibly take out temp and directly import
@@ -280,14 +325,21 @@ def playFrames(xFrames, yFrames, export, startIndex):
                 outputFile = 'C:/Users/micha/code/cytoscape_code/jn/data/output/test/frame'+ str(startIndex + i) +'.jpeg')
 
 
-# In[20]:
+# In[175]:
 
 
-# playNetworks takes a dictionary of time:network, and a frameMultiplier. It plays all the frames between networks in order.
-# the number of frames between two networks is decided by the time between them, multiplied by the frameMultiplier.
-# a higher frameMultiplier will take longer but will be smoother
-# spread is how spread out the nodes are plotted
 def playNetworks(networks, frameMultiplier, spread):
+    """
+    Plays networks from a dictionary of time:network. It plays all the frames between networks in order.
+    the number of frames between two networks is decided by the time keys. playNetworks automatically exports each frame
+    to a .jpeg file.
+    
+    Parameters:
+        networks (dictionary): Dictionary of time:network. Networks will be played in order with frames added between network node coordinates
+        frameMultiplier (int): frameMultiplier decides how many frames each unit of time recieves
+        spread (int): Space between nodes, the greater the spread the farther apart the nodes will be
+        
+    """
 #     first importing edges so nodes coordinates can be imported later
     initialEdge = convertEdge(networks[list(networks.keys())[0]])
     importEdge(initialEdge)
@@ -324,28 +376,3 @@ def playNetworks(networks, frameMultiplier, spread):
         totalFrames += frames
 
         time.sleep(1)
-
-
-# In[21]:
-
-
-networks = generateNetworks(num = 10, degree = 3, nodes =10, time = 15)
-
-for x in range (len(networks)):
-    addNodeAttributes(networks[list(networks.keys())[x]], 'test attribute', 'test')
-    
-predictTimes(networks)
-
-
-# In[23]:
-
-
-# should end up with around time*frameMultiplier frames at the end, give or take some because of the casting to int
-playNetworks(networks, frameMultiplier = 30, spread = 500)
-
-
-# In[ ]:
-
-
-# nx.draw(L, pos = nx.spring_layout(L, iterations = 0, pos = {i:[i,i**2] for i in range (10)}))
-
