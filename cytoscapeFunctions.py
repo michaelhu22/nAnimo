@@ -141,6 +141,7 @@ def importNode(nodes, cyclient):
     
     Parameters:
         nodes(DataFrame): A DataFrame with node data to be imported
+        cyclient (py2cytoscape.cyrest.cyrest.cyclient): cyclient object
         
     *Cytoscape requires network to already exist, or else importing node data will not work.
      Use cytoscape.network.create_empty() or importEdge() prior to this if network doesn't already exist.
@@ -179,7 +180,7 @@ def importEdge(edges, cyclient):
         firstRowAsColumnNames = "true",
         startLoadRow = '0',
         afile = path)
-    time.sleep(5)
+    time.sleep(0.1)
 
 # In[171]:
 
