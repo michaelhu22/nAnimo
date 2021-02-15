@@ -8,6 +8,7 @@ import pandas as pd
 import random
 import time
 import tempfile
+import os
 from networkx.generators.random_graphs import barabasi_albert_graph as ba
 
 
@@ -134,7 +135,7 @@ def addSpringCoords (network,spread):
 # In[169]:
 
 
-def importNode(nodes):
+def importNode(nodes, cyclient):
     """
     Sends node data to cytoscape from a DataFrame
     
@@ -142,68 +143,61 @@ def importNode(nodes):
         nodes(DataFrame): A DataFrame with node data to be imported
         
     *Cytoscape requires network to already exist, or else importing node data will not work.
-     Use cytoscape.network.create_empty() or importEdge() prior if receiving error.
+     Use cytoscape.network.create_empty() or importEdge() prior to this if network doesn't already exist.
     """
-    nodes.to_csv('data/nodeData.csv')
-    cytoscape.table.import_file(
+    
+    path = os.path.join(os.path.dirname(os.path.abspath("template.cys")), "temp.csv")
+    
+    nodes.to_csv(path)
+    cyclient.table.import_file(
         keyColumnIndex = "1",
         startLoadRow = "0",
         dataTypeList = "String",
         firstRowAsColumnNames = 'True',
-        afile = 'C:/Users/micha/code/cytoscape_code/jn/data/nodeData.csv')
+        afile = path)
 
 
 # In[170]:
 
 
-def importEdge(edges):
+def importEdge(edges, cyclient):
     """
     Sends edge data to cytoscape from a DataFrame
     
     Parameters:
         edges(DataFrame): A DataFrame with edge data to be imported
+        cyclient (py2cytoscape.cyrest.cyrest.cyclient): cyclient object 
         
     *Will create a new network in Cytoscape instead of overwriting current network
     """
-    edges.to_csv('data/edgeData.csv')
-    cytoscape.network.import_file(
+    path = os.path.join(os.path.dirname(os.path.abspath("template.cys")), "temp.csv")
+    
+    edges.to_csv(path)
+    cyclient.network.import_file(
         indexColumnSourceInteraction="2",
         indexColumnTargetInteraction ="3",
         firstRowAsColumnNames = "true",
         startLoadRow = '0',
-        afile ='C:/Users/micha/code/cytoscape_code/jn/data/edgeData.csv')
-    time.sleep(0.1)
-
+        afile = path)
+    time.sleep(5)
 
 # In[171]:
 
 
-def toCytoscape(nodes, edges):
+def toCytoscape(nodes, edges, cyclient):
     """
     Sends node and edge data to cytoscape from DataFrames
     
     Parameters:
         nodes(DataFrame): A DataFrame with node data to be imported
         edges(DataFrame): A DataFrame with edge data to be imported
+        cyclient (py2cytoscape.cyrest.cyrest.cyclient): cyclient object 
+
         
     *Will create a new network in Cytoscape instead of overwriting current network
     """
-    edges.to_csv('data/edgeData.csv')
-    nodes.to_csv('data/nodeData.csv')
-    
-    cytoscape.network.import_file(
-        indexColumnSourceInteraction="2",
-        indexColumnTargetInteraction ="3",
-        firstRowAsColumnNames = "true",
-        startLoadRow = '0',
-        afile ='C:/Users/micha/code/cytoscape_code/jn/data/edgeData.csv')
-    time.sleep(0.1)
-    cytoscape.table.import_file(
-        keyColumnIndex = "1",
-        startLoadRow = "0",
-        dataTypeList = "String",
-        firstRowAsColumnNames = 'True',
-        afile = 'C:/Users/micha/code/cytoscape_code/jn/data/nodeData.csv')
+    importEdge(edges, cyclient)
+    importNode(nodes, cyclient)
 
 
 # In[172]:
@@ -275,7 +269,7 @@ def createFrames(df1, df2, columnName, frames):
 # In[174]:
 
 
-def playFrames(xFrames, yFrames, export, startIndex):
+def playFrames(xFrames, yFrames, export, startIndex, cyclient):
     """
     Plays frames into Cytoscape from DataFrames with node# rows and frame# columns.
     
@@ -284,29 +278,35 @@ def playFrames(xFrames, yFrames, export, startIndex):
         yFrames (DataFrame): DataFrame of node# rows and frame# columns of y coordinate data
         export (bool): If export == True, playFrames will export every frame from Cytoscape as a .jpeg
         startIndex (int): Starting index of named image files (creates no naming overlap if running playFrames multiple times for the same image folder)
+        cyclient (py2cytoscape.cyrest.cyrest.cyclient): cyclient object 
+        
     """
     
     temp = pd.DataFrame()
     
 #     copying each frames x/y coordinates to temp and importing them (could possibly take out temp and directly import
 #     frames?)
+    if not os.path.exists(os.path.abspath("frames")):
+        os.makedirs("frames")
+    
+    path = os.path.abspath("frames")
     for i in range (len(xFrames.columns)):
         temp['x'] = xFrames['f'+str(i)].array
         temp['y'] = yFrames['f'+str(i)].array
-        importNode(temp)
+        importNode(temp, cyclient)
         time.sleep(0.3)
-        cytoscape.view.fit_content()
+        cyclient.view.fit_content()
         time.sleep(0.3)
         if export:
-            cytoscape.view.export(
+            cyclient.view.export(
                 options = 'jpeg',
-                outputFile = 'C:/Users/micha/code/cytoscape_code/jn/data/output/test/frame'+ str(startIndex + i) +'.jpeg')
+                outputFile = os.path.join(path, str(startIndex + i) +'.jpeg'))
 
 
 # In[175]:
 
 
-def playNetworks(networks, frameMultiplier, spread):
+def playNetworks(networks, frameMultiplier, spread, cyclient):
     """
     Plays networks from a dictionary of time:network. It plays all the frames between networks in order.
     the number of frames between two networks is decided by the time keys. playNetworks automatically exports each frame
@@ -316,11 +316,12 @@ def playNetworks(networks, frameMultiplier, spread):
         networks (dictionary): Dictionary of time:network. Networks will be played in order with frames added between network node coordinates
         frameMultiplier (int): frameMultiplier decides how many frames each unit of time recieves
         spread (int): Space between nodes, the greater the spread the farther apart the nodes will be
+        cyclient (py2cytoscape.cyrest.cyrest.cyclient): cyclient object 
         
     """
 #     first importing edges so nodes coordinates can be imported later
     initialEdge = convertEdge(networks[list(networks.keys())[0]])
-    importEdge(initialEdge)
+    importEdge(initialEdge, cyclient)
     time.sleep(0.3)
     
 #     create a list of DataFrames for each network node list (with spring layout coordinates) outside of the for loop,
@@ -343,13 +344,13 @@ def playNetworks(networks, frameMultiplier, spread):
         yFrames = createFrames(nodeList[x], nodeList[x+1], 'y', frames)
         
 #         import the current node coordinates to make sure graph node locations are continuous with each playFrames run.
-        importNode(nodeList[x])
+        importNode(nodeList[x], cyclient)
         
-        playFrames(xFrames,yFrames, export = True, startIndex = totalFrames)
+        playFrames(xFrames,yFrames, export = True, startIndex = totalFrames, cyclient = cyclient)
         
 #         import edges of next graph, which should have node coordinates in place after playframes is run.
         n2Edges = convertEdge(networks[list(networks.keys())[x+1]])
-        importEdge(n2Edges)
+        importEdge(n2Edges, cyclient)
         
         totalFrames += frames
 
