@@ -28,7 +28,7 @@ def generateNetworks(num, d, n, time):
     """
     networkDict = {}
     times = []
-    for i in range (num):
+    for i in range(num):
         rand = random.random()*time
         while rand in times:
             rand = random.random()*time
@@ -148,15 +148,14 @@ def importNode(nodes, cyclient):
     """
     
     path = os.path.join(os.path.dirname(os.path.abspath("template.cys")), "temp.csv")
-    
     nodes.to_csv(path)
+                 
     cyclient.table.import_file(
         keyColumnIndex = "1",
         startLoadRow = "0",
         dataTypeList = "String",
         firstRowAsColumnNames = 'True',
         afile = path)
-
 
 # In[170]:
 
@@ -172,7 +171,7 @@ def importEdge(edges, cyclient):
     *Will create a new network in Cytoscape instead of overwriting current network
     """
     path = os.path.join(os.path.dirname(os.path.abspath("template.cys")), "temp.csv")
-    
+
     edges.to_csv(path)
     cyclient.network.import_file(
         indexColumnSourceInteraction="2",
@@ -180,7 +179,8 @@ def importEdge(edges, cyclient):
         firstRowAsColumnNames = "true",
         startLoadRow = '0',
         afile = path)
-    time.sleep(0.1)
+    time.sleep(3)
+
 
 # In[171]:
 
@@ -270,7 +270,7 @@ def createFrames(df1, df2, columnName, frames):
 # In[174]:
 
 
-def playFrames(xFrames, yFrames, export, startIndex, cyclient):
+def playFrames(xFrames, yFrames, export, startIndex, cyclient, dirName):
     """
     Plays frames into Cytoscape from DataFrames with node# rows and frame# columns.
     
@@ -280,6 +280,7 @@ def playFrames(xFrames, yFrames, export, startIndex, cyclient):
         export (bool): If export == True, playFrames will export every frame from Cytoscape as a .jpeg
         startIndex (int): Starting index of named image files (creates no naming overlap if running playFrames multiple times for the same image folder)
         cyclient (py2cytoscape.cyrest.cyrest.cyclient): cyclient object 
+        dirName (str): name of folder where frames will be imported
         
     """
     
@@ -287,10 +288,10 @@ def playFrames(xFrames, yFrames, export, startIndex, cyclient):
     
 #     copying each frames x/y coordinates to temp and importing them (could possibly take out temp and directly import
 #     frames?)
-    if not os.path.exists(os.path.abspath("frames")):
-        os.makedirs("frames")
+    if not os.path.exists(os.path.abspath(dirName)):
+        os.makedirs(os.path.abspath(dirName))
     
-    path = os.path.abspath("frames")
+    path = os.path.abspath(dirName)
     for i in range (len(xFrames.columns)):
         temp['x'] = xFrames['f'+str(i)].array
         temp['y'] = yFrames['f'+str(i)].array
@@ -302,7 +303,6 @@ def playFrames(xFrames, yFrames, export, startIndex, cyclient):
             cyclient.view.export(
                 options = 'jpeg',
                 outputFile = os.path.join(path, str(startIndex + i) +'.jpeg'))
-
 
 # In[175]:
 
@@ -318,9 +318,10 @@ def playNetworks(networks, frameMultiplier, spread, cyclient):
         frameMultiplier (int): frameMultiplier decides how many frames each unit of time recieves
         spread (int): Space between nodes, the greater the spread the farther apart the nodes will be
         cyclient (py2cytoscape.cyrest.cyrest.cyclient): cyclient object 
-        
+        dirName (str): name of folder where frames will be imported
     """
 #     first importing edges so nodes coordinates can be imported later
+    dirName = input("dirname:")
     initialEdge = convertEdge(networks[list(networks.keys())[0]])
     importEdge(initialEdge, cyclient)
     time.sleep(0.3)
@@ -347,7 +348,7 @@ def playNetworks(networks, frameMultiplier, spread, cyclient):
 #         import the current node coordinates to make sure graph node locations are continuous with each playFrames run.
         importNode(nodeList[x], cyclient)
         
-        playFrames(xFrames,yFrames, export = True, startIndex = totalFrames, cyclient = cyclient)
+        playFrames(xFrames,yFrames, export = True, startIndex = totalFrames, cyclient = cyclient, dirName = dirName)
         
 #         import edges of next graph, which should have node coordinates in place after playframes is run.
         n2Edges = convertEdge(networks[list(networks.keys())[x+1]])
