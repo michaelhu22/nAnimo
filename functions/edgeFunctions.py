@@ -11,16 +11,6 @@ import tempfile
 from networkx.generators.random_graphs import barabasi_albert_graph as ba
 
 
-# In[ ]:
-
-
-# G = nx.fast_gnp_random_graph(10, 0.4)
-# G1 = nx.fast_gnp_random_graph(10, 0.6)
-
-
-# In[ ]:
-
-
 def addEdgeAttrib (nxGraph, attribName, lowNum, highNum):
     edges = nxGraph.edges(data = True)
     
@@ -41,16 +31,7 @@ def addHalfEdgeAttrib (nxGraph, attribName, lowNum1, highNum1, lowNum2, highNum2
     else:
         for i in range(half):
             nxGraph[list(edges)[i+(half)][0]][list(edges)[i+half][1]][attribName] = random.randint(lowNum2, highNum2)
-# In[ ]:
 
-
-# addEdgeAttrib(G, 'weight', 0,1)
-# addEdgeAttrib(G, 'test',1,10)
-# addEdgeAttrib(G1, 'weight',0,1)
-# addEdgeAttrib(G1, 'test',1,10)
-
-
-# In[ ]:
 
 
 # if True, return True and element in inputList
@@ -123,13 +104,3 @@ def deleteZeroWeights (networks):
                     empty = False
             if empty == True:
                 network.remove_edge(edge[0], edge[1])
-
-
-# In[ ]:
-
-
-# path = os.path.join(os.path.dirname(os.path.abspath("template.cys")), "sample.csv")
-# for i in range(len(networks)):
-#     convertEdge(networks[i]).to_csv(path)
-#     time.sleep(0.3)
-
