@@ -58,7 +58,7 @@ def addNodeAttributes (network, attribute, value):
 # In[166]:
 
 
-def convertEdge (network):
+def convertEdge (network, extraAttribs = True):
     """
     Return a DataFrame of readable edge data from a networkX graph
     
@@ -70,12 +70,20 @@ def convertEdge (network):
     """
     networkEdges = network.edges(data = True)
     d = {'source':[], 'target':[]}
-    for i in networkEdges:
-        d['source'].append(i[0])
-        d['target'].append(i[1])
-    columns = list((list(networkEdges)[0][2]).keys())
-    for i in range (len(columns)):
-        d[columns[i]] = [x[2][columns[i]] for x in networkEdges]
+    
+    if extraAttribs:
+        attribNames = list(list(networkEdges)[0][2].keys())
+    
+    for x in networkEdges:
+        d['source'].append(x[0])
+        d['target'].append(x[1])
+    
+    if extraAttribs:
+        for i in range(len(attribNames)):
+            d[attribNames[i]] = []
+            for x in networkEdges:
+                d[attribNames[i]].append(list(x[2].values())[i])
+
     edges = pd.DataFrame(d)
     edges.sort_values('source')
     return edges
@@ -105,7 +113,7 @@ def convertNode (network):
 # In[168]:
 
 
-def addSpringCoords (network,spread):
+def addSpringCoords (network,spread, inPos = None, inIterations = 50):
     """
     Returns a DataFrame of node data from a networkX graph, with additional x and y columns of spring layout coordinates
     for each node
@@ -119,7 +127,7 @@ def addSpringCoords (network,spread):
     """
     nodeData = convertNode(network)
 #     using networkx spring_layout function
-    coords = nx.spring_layout(network)
+    coords = nx.spring_layout(network, pos = inPos, iterations = inIterations)
     for i in range (len(coords)):
         for j in range (2):
             coords[i][j] = int(coords[i][j]*spread)
@@ -155,6 +163,7 @@ def importNode(nodes, cyclient):
         startLoadRow = "0",
         dataTypeList = "String",
         firstRowAsColumnNames = 'True',
+        DataTypeTargetForNetworkCollection = "Node Table Columns",
         afile = path)
 
 # In[170]:
@@ -178,8 +187,8 @@ def importEdge(edges, cyclient):
         indexColumnTargetInteraction ="3",
         firstRowAsColumnNames = "true",
         startLoadRow = '0',
+#         DataTypeTargetForNetworkCollection = "Edge Table Columns",
         afile = path)
-    time.sleep(3)
 
 
 # In[171]:
@@ -309,7 +318,7 @@ def playFrames(xFrames, yFrames, export, startIndex, cyclient, dirName):
 
 def playNetworks(networks, frameMultiplier, spread, cyclient):
     """
-    Plays networks from a dictionary of time:network. It plays all the frames between networks in order.
+    Plays networks from a dictionary of time:network. NOW A LIST OF NETWORKS It plays all the frames between networks in order.
     the number of frames between two networks is decided by the time keys. playNetworks automatically exports each frame
     to a .jpeg file.
     
@@ -322,7 +331,7 @@ def playNetworks(networks, frameMultiplier, spread, cyclient):
     """
 #     first importing edges so nodes coordinates can be imported later
     dirName = input("dirname:")
-    initialEdge = convertEdge(networks[list(networks.keys())[0]])
+    initialEdge = convertEdge(networks[0])
     importEdge(initialEdge, cyclient)
     time.sleep(0.3)
     
@@ -330,18 +339,17 @@ def playNetworks(networks, frameMultiplier, spread, cyclient):
 #     because networkx may create a different set of coordiantes for the same network every time nx.spring_layout is run. 
     nodeList = []
     for x in range (len(networks)):
-        nodeList.append(addSpringCoords(networks[list(networks.keys())[x]], spread))
+        nodeList.append(addSpringCoords(networks[x], spread))
         nodeList[0]
-
-#    create a list of keys (times) so the corresponding number of frames can be made between each network
-    times = list(networks.keys())
     
 #     counting total frames in for loop so files can be named correctly for ffmpeg
     totalFrames = 0
     
 #     for every network, create frames between networks and play the frames
+# CURRENTLY JUST USING 10 FRAMES PER NETWORK
+# IMPORTANT VVVVVVVVVV
     for x in range (len(networks)-1):
-        frames = int((times[x+1]-times[x])*frameMultiplier)
+        frames = 10
         xFrames = createFrames(nodeList[x], nodeList[x+1], 'x', frames)
         yFrames = createFrames(nodeList[x], nodeList[x+1], 'y', frames)
         
@@ -351,7 +359,7 @@ def playNetworks(networks, frameMultiplier, spread, cyclient):
         playFrames(xFrames,yFrames, export = True, startIndex = totalFrames, cyclient = cyclient, dirName = dirName)
         
 #         import edges of next graph, which should have node coordinates in place after playframes is run.
-        n2Edges = convertEdge(networks[list(networks.keys())[x+1]])
+        n2Edges = convertEdge(networks[x+1])
         importEdge(n2Edges, cyclient)
         
         totalFrames += frames
