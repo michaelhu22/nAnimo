@@ -88,28 +88,6 @@ def conformEdges (network1, network2):
 # In[ ]:
 
 
-# conformEdges (G,G1)
-
-
-# In[ ]:
-
-
-# edges1 and edges2 should have the same length, going from edge1 -> edge2
-def genShifts(edges1, edges2, columnName, numNetworks):
-    numEdges = len(edges1)
-    shifts = []
-    
-    for i in range(numEdges):
-        a = list(edges1)[i][2][columnName]
-        b = list(edges2)[i][2][columnName]
-        shifts.append((b-a)/(numNetworks-1))
-    
-    return shifts
-
-
-# In[ ]:
-
-
 # assume edgeLists same length, and same attribute catagories
 def fillBetweenEdges(nxGraph1, nxGraph2, numNetworks):
     edges1, edges2 = list(nxGraph1.edges(data = True)), list(nxGraph2.edges(data = True))
