@@ -117,6 +117,11 @@ def fillBetweenEdges(nxGraph1, nxGraph2, numNetworks):
 
 # postprocessing after network list has already been made
 def deleteZeroWeights (networks):
+    """
+    Removes edges with all attributes with value 0 from a networkxGraph
+    
+    networks (list[networkx.classes.graph.Graph]) = list of networkx Graph objects to remove 0 weight edges out of
+    """
     for network in networks:
         edges = list(network.edges(data = True))
         keys = list(edges[0][2].keys())
