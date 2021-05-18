@@ -57,7 +57,10 @@ def contains (element, inputList):
 # preprossesing
 def conformEdges (network1, network2):
     """
-    Sets each network with the 
+    Sets each network with the union of the edges of both networks. New edges will have initial attributes set to 0.
+    
+    network1 (networkx.classes.graph.Graph) = networkx Graph
+    network2 (networkx.classes.graph.Graph) = networkx Graph
     """
     edges1 = list(network1.edges())
     edges2 = list(network2.edges())
@@ -83,6 +86,15 @@ def conformEdges (network1, network2):
 
 # assume edgeLists same length, and same attribute catagories
 def fillBetweenEdges(nxGraph1, nxGraph2, numNetworks):
+    """
+    Returns a list with size numNetworks of networkx Graphs, with edge attribute data from nxGraph1 to nxGraph2 evenly spaced between each network. networks[0] will have nxGraph1, and networks[numNetworks-1] will have nxGraph2
+    
+    nxGraph1 (networkx.classes.graph.Graph) = first networkx Graph in the list of networks
+    nxGraph2 (networkx.classes.graph.Graph) = last networkx Graph in the list of networks
+    numNetworks (int) = number of networkx Graphs in the returned list of networks
+    
+    *both networkx Graphs must have the same edges (use conformEdges()). They must also have the same attributes.
+    """
     edges1, edges2 = list(nxGraph1.edges(data = True)), list(nxGraph2.edges(data = True))
     numEdges = len(edges1)
     keys = list(list(edges1)[0][2].keys())
