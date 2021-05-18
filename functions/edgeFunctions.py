@@ -12,25 +12,34 @@ from networkx.generators.random_graphs import barabasi_albert_graph as ba
 
 
 def addEdgeAttrib (nxGraph, attribName, lowNum, highNum):
+    """
+    Adds Edge attribute data (random/numeric) to an exisiting networkx Graph
+    
+    nxGraph (networkx.classes.graph.Graph) = networkx Graph to add attributes in
+    attribName (str) = Name of attribute
+    lowNum (float) = low bound of randomly generated number
+    highNum (float) high bound of randomly generated number
+    
+    """
     edges = nxGraph.edges(data = True)
     
     for i in range (len(edges)):
         nxGraph[list(edges)[i][0]][list(edges)[i][1]][attribName] = np.random.rand()*(highNum-lowNum)+lowNum
 
 
-def addHalfEdgeAttrib (nxGraph, attribName, lowNum1, highNum1, lowNum2, highNum2):
-    edges = nxGraph.edges(data = True)
-    half = int(len(edges)/2)
+# def addHalfEdgeAttrib (nxGraph, attribName, lowNum1, highNum1, lowNum2, highNum2):
+#     edges = nxGraph.edges(data = True)
+#     half = int(len(edges)/2)
     
-    for i in range (half):
-        nxGraph[list(edges)[i][0]][list(edges)[i][1]][attribName] = random.randint(lowNum1, highNum1)
+#     for i in range (half):
+#         nxGraph[list(edges)[i][0]][list(edges)[i][1]][attribName] = random.randint(lowNum1, highNum1)
     
-    if len(edges)%2 == 0:
-        for i in range(half):
-            nxGraph[list(edges)[i+(half)][0]][list(edges)[i+half][1]][attribName] = random.randint(lowNum2, highNum2)
-    else:
-        for i in range(half):
-            nxGraph[list(edges)[i+(half)][0]][list(edges)[i+half][1]][attribName] = random.randint(lowNum2, highNum2)
+#     if len(edges)%2 == 0:
+#         for i in range(half):
+#             nxGraph[list(edges)[i+(half)][0]][list(edges)[i+half][1]][attribName] = random.randint(lowNum2, highNum2)
+#     else:
+#         for i in range(half):
+#             nxGraph[list(edges)[i+(half)][0]][list(edges)[i+half][1]][attribName] = random.randint(lowNum2, highNum2)
 
 
 
@@ -47,6 +56,9 @@ def contains (element, inputList):
 
 # preprossesing
 def conformEdges (network1, network2):
+    """
+    Sets each network with the 
+    """
     edges1 = list(network1.edges())
     edges2 = list(network2.edges())
 
