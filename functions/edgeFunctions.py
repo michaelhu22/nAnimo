@@ -1,6 +1,8 @@
 get_ipython().run_line_magic('run', 'functions/cytoscapeFunctions')
 
 
+# functions used to format and converge networkx edge data
+
 from py2cytoscape import cyrest
 import networkx as nx
 import numpy as np
