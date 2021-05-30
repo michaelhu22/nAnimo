@@ -29,22 +29,6 @@ def addEdgeAttrib (nxGraph, attribName, lowNum, highNum):
         nxGraph[list(edges)[i][0]][list(edges)[i][1]][attribName] = np.random.rand()*(highNum-lowNum)+lowNum
 
 
-# def addHalfEdgeAttrib (nxGraph, attribName, lowNum1, highNum1, lowNum2, highNum2):
-#     edges = nxGraph.edges(data = True)
-#     half = int(len(edges)/2)
-    
-#     for i in range (half):
-#         nxGraph[list(edges)[i][0]][list(edges)[i][1]][attribName] = random.randint(lowNum1, highNum1)
-    
-#     if len(edges)%2 == 0:
-#         for i in range(half):
-#             nxGraph[list(edges)[i+(half)][0]][list(edges)[i+half][1]][attribName] = random.randint(lowNum2, highNum2)
-#     else:
-#         for i in range(half):
-#             nxGraph[list(edges)[i+(half)][0]][list(edges)[i+half][1]][attribName] = random.randint(lowNum2, highNum2)
-
-
-
 # if True, return True and element in inputList
 def contains (element, inputList):
     for i in range (len(inputList)):
