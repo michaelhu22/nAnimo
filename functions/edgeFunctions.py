@@ -119,3 +119,12 @@ def deleteZeroWeights (networks):
                     empty = False
             if empty == True:
                 network.remove_edge(edge[0], edge[1])
+                
+def deleteLoneNodes (network):
+    for node in list(network.nodes()):
+        if len(list(network.adj[node])) == 0:
+            network.remove_node(node)
+
+def deleteLoneListNodes (networks):
+    for network in networks:
+        deleteLoneNodes(network)
