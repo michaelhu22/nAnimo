@@ -1,3 +1,4 @@
+
 get_ipython().run_line_magic('run', 'functions/cytoscapeFunctions')
 
 
@@ -11,6 +12,7 @@ import random
 import time
 import tempfile
 from networkx.generators.random_graphs import barabasi_albert_graph as ba
+from IPython.core.getipython import get_ipython
 
 
 def addEdgeAttrib (nxGraph, attribName, lowNum, highNum):

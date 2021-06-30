@@ -5,3 +5,7 @@ abc
 temp.ipynb
 outputTests
 samplePic
+ipynbs
+*.mp4
+*.pyc
+.vscode

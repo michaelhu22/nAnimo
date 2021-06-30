@@ -2,20 +2,22 @@
 # coding: utf-8
 
 # In[1]:
+import networkx as nx
+from decorator import decorator
+import os
+import pandas as pd
+from _pytest import warnings
+from IPython.core.getipython import get_ipython
 
-
-get_ipython().run_line_magic('run', 'functions/cytoscapeFunctions')
-get_ipython().run_line_magic('run', 'functions/edgeFunctions')
+# get_ipython().run_line_magic('run', 'functions/cytoscapeFunctions')
+# get_ipython().run_line_magic('run', 'functions/edgeFunctions')
 
 
 # In[2]:
 
 
 import numpy as np
-import networkx as nx
-from decorator import decorator
-import os
-import pandas as pd
+
 
 
 # In[4]:
