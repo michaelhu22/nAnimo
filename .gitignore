@@ -9,3 +9,4 @@ ipynbs
 *.mp4
 *.pyc
 .vscode
+app.py
