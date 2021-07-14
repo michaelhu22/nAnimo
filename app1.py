@@ -74,7 +74,7 @@ gmpNetwork, progNetwork = networkExtract()
 # end of network import
 
 layout = fruchterman_reingold_layout_edit(
-    gmpNetwork, seed=1, iterations=1000, pretendIterations=50, stop=100)
+    gmpNetwork, seed=1, iterations=1000, pretendIterations=50, stop=250)
 edgeList = list(gmpNetwork.edges(data=True))
 myElements = formatPos(gmpNetwork.nodes(data=True),
                        layout, 1000) + formatEdge(edgeList)
@@ -96,19 +96,19 @@ myStylesheet = [
     }
 ]
 
-options = {
-    'name': 'cose',
-    'initialTemp': '10',
-    'coolingFactor': '0.99',
-    'minTemp': '0.1',
-    'numIter': '250',
-    'animate': False,
-    'animationThreshold': '1',
-    'refresh': '5',
-    'fit': True,
-    'animationEasing': True,
-    #   'nodeOverlap': '4'
-}
+# options = {
+#     'name': 'cose',
+#     'initialTemp': '10',
+#     'coolingFactor': '0.99',
+#     'minTemp': '0.1',
+#     'numIter': '250',
+#     'animate': False,
+#     'animationThreshold': '1',
+#     'refresh': '5',
+#     'fit': True,
+#     'animationEasing': True,
+#     #   'nodeOverlap': '4'
+# }
 
 
 print(myElements[0])
@@ -117,9 +117,10 @@ app = dash.Dash(__name__)
 app.layout = html.Div([
     html.Button('go', id='go-button', n_clicks=0),
     html.Div(id='output'),
+    dcc.Location(id='url', refresh = False),
     cyto.Cytoscape(
         id='cytoscape',
-        # layout={'name' :'preset'},
+        layout={'name' :'preset'},
         style={'width': '100%', 'height': '800px'},
         elements=myElements,
         stylesheet=myStylesheet
@@ -131,21 +132,28 @@ app.clientside_callback(
         function(n_clicks){
             let options = {
                 'name': 'cose',
-                'initialTemp': '10',
-                'coolingFactor': '0.99',
-                'minTemp': '1',
-                'numIter': '250',
+                'initialTemp': '1',
+                'coolingFactor': '0.9999',
+                'minTemp': '0.1',
+                'numIter': '100',
                 'animate': true,
-                'animationThreshold': '20',
-                'refresh': '5',
+                'animationThreshold': '1',
+                'refresh': '1',
                 'fit': true,
                 'animationEasing': true,
-                'nodeOverlap': '1'
-            }
-			if (n_clicks == 1){
+                'nodeOverlap': '1',
+                'gravity': '0',
+                'padding':'50'
+                }
+            
+			if (typeof window.coseLayout == 'undefined'){
 				window.coseLayout = cy.layout(options)
+                window.coseLayout.run()
+                setTimeout(function(){
+                    window.coseLayout.stop()
+                }, 0.0000001)
 			}
-            if (n_clicks % 2 == 0){
+            if (n_clicks % 2 == 1){
                 window.coseLayout.stop()
                 return 'stop'.concat(String(n_clicks))
             } else {
@@ -156,7 +164,7 @@ app.clientside_callback(
     """,
 
     Output('output', 'children'),
-    [Input('go-button', 'n_clicks')]
+    Input('go-button', 'n_clicks'),
 )
 
 # @app.callback(
