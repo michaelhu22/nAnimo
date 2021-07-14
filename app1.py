@@ -142,9 +142,9 @@ app.clientside_callback(
                 'animationEasing': true,
                 'nodeOverlap': '1'
             }
-			if (n_clicks == 1){
-				window.coseLayout = cy.layout(options)
-			}
+            if (typeof window.coseLayout === 'undefined') {
+                window.coseLayout = cy.layout(options)
+            }
             if (n_clicks % 2 == 0){
                 window.coseLayout.stop()
                 return 'stop'.concat(String(n_clicks))
