@@ -1,6 +1,8 @@
 import dash
 import dash_cytoscape as cyto
 import dash_html_components as html
+import dash_core_components as dcc
+from dash.dependencies import Input, Output
 import networkx as nx
 import os
 import pandas as pd
@@ -8,9 +10,11 @@ from functions.springLayoutJN1 import fruchterman_reingold_layout_edit
 from functions.dashFunc import formatPos
 from functions.dashFunc import formatEdge
 from _pytest import warnings
-
+import time
 
 # importing networks - kinda messy
+
+
 def networkExtract():
 
     networkFolder = os.path.join(os.path.dirname(
@@ -65,15 +69,15 @@ def networkExtract():
 
     return gmpNetwork, progNetwork
 
+
 gmpNetwork, progNetwork = networkExtract()
 # end of network import
 
 layout = fruchterman_reingold_layout_edit(
-    gmpNetwork, seed=1, iterations=1000, pretendIterations=50, stop=400)
+    gmpNetwork, seed=1, iterations=1000, pretendIterations=50, stop=100)
 edgeList = list(gmpNetwork.edges(data=True))
-
-myElements = formatPos(gmpNetwork.nodes(data=True),layout, 1000) + formatEdge(edgeList)
-
+myElements = formatPos(gmpNetwork.nodes(data=True),
+                       layout, 1000) + formatEdge(edgeList)
 myStylesheet = [
     {
         'selector': '.normal',
@@ -84,25 +88,88 @@ myStylesheet = [
     {
         'selector': '.TF',
         'style': {
-            'content':'data(label)',
-            'background-color':'black'
+            'content': 'data(label)',
+            'background-color': 'black',
+            'width': 40,
+            'height': 40,
         }
     }
 ]
+
+options = {
+    'name': 'cose',
+    'initialTemp': '10',
+    'coolingFactor': '0.99',
+    'minTemp': '0.1',
+    'numIter': '250',
+    'animate': False,
+    'animationThreshold': '1',
+    'refresh': '5',
+    'fit': True,
+    'animationEasing': True,
+    #   'nodeOverlap': '4'
+}
 
 
 print(myElements[0])
 
 app = dash.Dash(__name__)
 app.layout = html.Div([
+    html.Button('go', id='go-button', n_clicks=0),
+    html.Div(id='output'),
     cyto.Cytoscape(
         id='cytoscape',
-        layout={'name': 'preset'},
+        # layout={'name' :'preset'},
         style={'width': '100%', 'height': '800px'},
         elements=myElements,
         stylesheet=myStylesheet
     )
 ])
 
+app.clientside_callback(
+    """
+        function(n_clicks){
+            let options = {
+                'name': 'cose',
+                'initialTemp': '10',
+                'coolingFactor': '0.99',
+                'minTemp': '1',
+                'numIter': '250',
+                'animate': true,
+                'animationThreshold': '20',
+                'refresh': '5',
+                'fit': true,
+                'animationEasing': true,
+                'nodeOverlap': '1'
+            }
+
+            window.coseLayout = cy.layout(options)
+
+            if (n_clicks % 2 == 0){
+                window.coseLayout.stop()
+                return 'stop'.concat(String(n_clicks))
+            } else {
+                window.coseLayout.run()
+                return 'go!!'.concat(String(n_clicks))
+            }
+        }
+    """,
+
+    Output('output', 'children'),
+    [Input('go-button', 'n_clicks')]
+)
+
+# @app.callback(
+#     Output('output', 'children'),
+#     [Input('go-button', 'n_clicks')]
+# )
+
+# def buttonStop(n_clicks):
+#     if int(n_clicks)%2==0:
+#         return 'go {}'.format(n_clicks)
+#     else:
+#         # cytoscape.stop()
+#         return 'stop {}'.format(n_clicks)
+
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, port = 1111)
