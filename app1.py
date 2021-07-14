@@ -115,13 +115,13 @@ print(myElements[0])
 
 app = dash.Dash(__name__)
 app.layout = html.Div([
-    html.Button('go', id='go-button', n_clicks=0),
+    html.Button('start/stop', id='go-button', n_clicks=0),
     html.Div(id='output'),
     dcc.Location(id='url', refresh = False),
     cyto.Cytoscape(
         id='cytoscape',
         layout={'name' :'preset'},
-        style={'width': '100%', 'height': '800px'},
+        style={'width': '100%', 'height': '600px'},
         elements=myElements,
         stylesheet=myStylesheet
     )
@@ -133,8 +133,8 @@ app.clientside_callback(
             let options = {
                 'name': 'cose',
                 'initialTemp': '1',
-                'coolingFactor': '0.9999',
-                'minTemp': '0.1',
+                'coolingFactor': '0.99',
+                'minTemp': '0.01',
                 'numIter': '100',
                 'animate': true,
                 'animationThreshold': '1',
@@ -144,6 +144,7 @@ app.clientside_callback(
                 'nodeOverlap': '1',
                 'gravity': '0',
                 'padding':'50'
+
                 }
             
 			if (typeof window.coseLayout == 'undefined'){
@@ -158,7 +159,7 @@ app.clientside_callback(
                 return 'stop'.concat(String(n_clicks))
             } else {
                 window.coseLayout.run()
-                return 'go!!'.concat(String(n_clicks))
+                return 'start'.concat(String(n_clicks))
             }
         }
     """,
