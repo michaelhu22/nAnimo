@@ -51,7 +51,7 @@ def networkExtract():
         progNetwork.add_edge(
             progEdgeDF['Regulator'][i], progEdgeDF['Target'][i])
 
-    # print(gmpOverlap, progOverlap)
+    print(gmpOverlap, progOverlap)
 
     gmpNodeIndexDF = gmpNodeDF.set_index('Name')
     progNodeIndexDF = progNodeDF.set_index('Name')
@@ -72,14 +72,10 @@ def networkExtract():
 gmpNetwork, progNetwork = networkExtract()
 # end of network import
 
-G = nx.gnm_random_graph(2000,6000)
-
-
-layout = fruchterman_reingold_layout_edit(
-    G, seed=1, iterations=1000, pretendIterations=50, stop=0)
+layout = fruchterman_reingold_layout_edit(gmpNetwork, seed=1, iterations=1000, pretendIterations=50, stop=10)
 print('layout loaded')
-edgeList = list(G.edges(data=True))
-myElements = formatPos(G.nodes(data=True), layout, 1000, False) + formatEdge(edgeList)
+edgeList = list(gmpNetwork.edges(data=True))
+myElements = formatPos(gmpNetwork.nodes(data=True),layout, 1000, True) + formatEdge(edgeList)
 myStylesheet = [
     {
         'selector': '.normal',
@@ -134,10 +130,10 @@ app.clientside_callback(
         function(n_clicks){
             let options = {
                 'name': 'cose',
-                'initialTemp': '1',
-                'coolingFactor': '0.99',
+                'initialTemp': '10',
+                'coolingFactor': '0.9999',
                 'minTemp': '0.01',
-                'numIter': '100',
+                'numIter': '250',
                 'animate': true,
                 'animationThreshold': '1',
                 'refresh': '1',
@@ -146,7 +142,6 @@ app.clientside_callback(
                 'nodeOverlap': '1',
                 'gravity': '0',
                 'padding':'50'
-
                 }
             
 			if (typeof window.coseLayout == 'undefined'){
@@ -154,14 +149,14 @@ app.clientside_callback(
                 window.coseLayout.run()
                 setTimeout(function(){
                     window.coseLayout.stop()
-                }, 0.0000001)
+                }, 0)
 			}
             if (n_clicks % 2 == 1){
                 window.coseLayout.stop()
-                return 'stop'.concat(String(n_clicks))
+                return 'stop, click# '.concat(String(n_clicks))
             } else {
                 window.coseLayout.run()
-                return 'start'.concat(String(n_clicks))
+                return 'start, click # '.concat(String(n_clicks))
             }
         }
     """,
@@ -183,4 +178,4 @@ app.clientside_callback(
 #         return 'stop {}'.format(n_clicks)
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, port = 1112)

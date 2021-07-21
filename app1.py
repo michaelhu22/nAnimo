@@ -2,13 +2,13 @@ import dash
 import dash_cytoscape as cyto
 import dash_html_components as html
 import dash_core_components as dcc
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
+from dash.exceptions import PreventUpdate
 import networkx as nx
 import os
 import pandas as pd
-from functions.springLayoutJN1 import fruchterman_reingold_layout_edit
-from functions.dashFunc import formatPos
-from functions.dashFunc import formatEdge
+from ipynbs.functions.springLayoutJN1 import fruchterman_reingold_layout_edit
+from ipynbs.functions.dashFunc import *
 from _pytest import warnings
 import time
 
@@ -73,50 +73,57 @@ def networkExtract():
 gmpNetwork, progNetwork = networkExtract()
 # end of network import
 
-layout = fruchterman_reingold_layout_edit(gmpNetwork, seed=1, iterations=1000, pretendIterations=50, stop=10)
+# G = nx.gnm_random_graph(2000,6000)
+numFrames = 100
+frames = formatPosList(gmpNetwork, makeFrames(gmpNetwork,numFrames,1000,50,5), 750, True)
+
 print('layout loaded')
 edgeList = list(gmpNetwork.edges(data=True))
-myElements = formatPos(gmpNetwork.nodes(data=True),layout, 1000, True) + formatEdge(edgeList)
+myElements = frames[0] + formatEdge(edgeList)
 myStylesheet = [
     {
         'selector': '.normal',
         'style': {
-            'background-color': 'maroon'
+            'background-color': 'maroon',
+            'width': 15,
+            'height':15
         }
     },
     {
         'selector': '.TF',
         'style': {
             'content': 'data(label)',
-            'background-color': 'black',
-            'width': 40,
-            'height': 40,
+            'background-color': 'blue',
+            'width': 50,
+            'height': 50,
         }
     }
 ]
 
-# options = {
-#     'name': 'cose',
-#     'initialTemp': '10',
-#     'coolingFactor': '0.99',
-#     'minTemp': '0.1',
-#     'numIter': '250',
-#     'animate': False,
-#     'animationThreshold': '1',
-#     'refresh': '5',
-#     'fit': True,
-#     'animationEasing': True,
-#     #   'nodeOverlap': '4'
-# }
-
-
-print(myElements[0])
-
 app = dash.Dash(__name__)
-app.layout = html.Div([
-    html.Button('start/stop', id='go-button', n_clicks=0),
-    html.Div(id='output'),
-    dcc.Location(id='url', refresh = False),
+app.layout = html.Div([ 
+    html.Button(
+        'play/pause',
+         id='play-button',
+         n_clicks=0),
+    html.Div(id = 'playing?'),
+    html.Div(id = 'frame#'),
+    dcc.Interval(
+        id = 'interval', 
+        interval = 500, 
+        n_intervals=0,
+        max_intervals=numFrames,
+        disabled = False
+    ),
+    dcc.Slider(
+        id='time-slider',
+        min = 0,
+        max = numFrames,
+        step = 1,
+        value= 0,
+        dots = True,
+        updatemode='drag'
+    ),
     cyto.Cytoscape(
         id='cytoscape',
         layout={'name' :'preset'},
@@ -126,58 +133,70 @@ app.layout = html.Div([
     )
 ])
 
-app.clientside_callback(
-    """
-        function(n_clicks){
-            let options = {
-                'name': 'cose',
-                'initialTemp': '10',
-                'coolingFactor': '0.9999',
-                'minTemp': '0.01',
-                'numIter': '250',
-                'animate': true,
-                'animationThreshold': '1',
-                'refresh': '1',
-                'fit': true,
-                'animationEasing': true,
-                'nodeOverlap': '1',
-                'gravity': '0',
-                'padding':'50'
+# app.config.suppress_callback_exceptions = True
 
-                }
-            
-			if (typeof window.coseLayout == 'undefined'){
-				window.coseLayout = cy.layout(options)
-                window.coseLayout.run()
-                setTimeout(function(){
-                    window.coseLayout.stop()
-                }, 0)
-			}
-            if (n_clicks % 2 == 1){
-                window.coseLayout.stop()
-                return 'stop, click# '.concat(String(n_clicks))
-            } else {
-                window.coseLayout.run()
-                return 'start, click # '.concat(String(n_clicks))
-            }
-        }
-    """,
-
-    Output('output', 'children'),
-    Input('go-button', 'n_clicks'),
+@app.callback(
+    Output('interval', 'n_intervals'),
+    [Input('play-button', 'n_clicks')],
+    [State('time-slider', 'value')]
 )
 
-# @app.callback(
-#     Output('output', 'children'),
-#     [Input('go-button', 'n_clicks')]
-# )
+def setn_interval(n_clicks, value):
+    return value
 
-# def buttonStop(n_clicks):
-#     if int(n_clicks)%2==0:
-#         return 'go {}'.format(n_clicks)
-#     else:
-#         # cytoscape.stop()
-#         return 'stop {}'.format(n_clicks)
+@app.callback(
+    Output('time-slider', 'value'),
+    [Input('interval', 'n_intervals')],
+    # [State('time-slider', 'drag_value')]
+)
+
+def onInterval(n_intervals):
+    if n_intervals == None:
+        return 0
+    else:
+        return n_intervals
+
+@app.callback(
+    Output('interval', 'disabled'),
+    [Input('play-button', 'n_clicks')]
+)
+
+def playPause (n_clicks):
+    if n_clicks % 2 == 0:
+        return True
+    else:
+        return False
+
+@app.callback(
+    Output('playing?', 'children'),
+    [Input('play-button', 'n_clicks')]
+)
+
+def playFeedback(n_clicks):
+    if n_clicks % 2 == 0:
+        return 'paused'
+    else:
+        return 'playing'
+
+# why isn't drag_value working
+@app.callback(
+    Output('cytoscape', 'elements'),
+    [Input('time-slider', 'value')],
+    [State('cytoscape', 'elements')]
+)
+
+def sliderFrame(value, elements):
+    return frames[value] + formatEdge(edgeList)
+
+
+
+@app.callback(
+    Output('frame#', 'children'),
+    [Input('time-slider', 'value')]
+)
+
+def sliderFrameNum(value):
+    return 'frame# ' + str(value)
 
 if __name__ == '__main__':
     app.run_server(debug=True, port = 1111)
