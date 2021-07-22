@@ -73,29 +73,42 @@ def networkExtract():
 gmpNetwork, progNetwork = networkExtract()
 # end of network import
 
-# G = nx.gnm_random_graph(2000,6000)
-numFrames = 100
-frames = formatPosList(gmpNetwork, makeFrames(gmpNetwork,numFrames,1000,50,5), 750, True)
+# gmpNetwork = nx.gnm_random_graph(2000,6000)
+numFrames = 1000
+frames = formatPosList(gmpNetwork, makeFrames(gmpNetwork,numFrames,inIterations = 1000, inPretendIterations = 50,inStop = 1), 1250, True)
 
 print('layout loaded')
-edgeList = list(gmpNetwork.edges(data=True))
-myElements = frames[0] + formatEdge(edgeList)
+edgeList = formatEdge(list(gmpNetwork.edges(data=True)))
+myElements = frames[0] + edgeList
 myStylesheet = [
     {
         'selector': '.normal',
         'style': {
             'background-color': 'maroon',
-            'width': 15,
-            'height':15
+            'background-opacity': '0.4',
+            'width': 30,
+            'height':30
         }
     },
     {
         'selector': '.TF',
         'style': {
             'content': 'data(label)',
-            'background-color': 'black',
-            'width': 50,
-            'height': 50,
+            'font-size': '40px',
+            # 'text-color':'red',
+            'background-color': '#b74e0e',
+            'background-opacity': '0.8',
+            'outline': 'black',
+            'width': 75,
+            'height': 75,
+        }
+    },
+    {
+        'selector': 'edge',
+        'style': {
+            'line-color' : 'black',
+            'width': '1px',
+            'opacity': 0.3
         }
     }
 ]
@@ -108,9 +121,11 @@ app.layout = html.Div([
          n_clicks=0),
     html.Div(id = 'playing?'),
     html.Div(id = 'frame#'),
+    dcc.Store(id = 'frames', storage_type='memory', data = frames),
+    dcc.Store(id = 'edgeList', storage_type='memory', data = edgeList),
     dcc.Interval(
-        id = 'interval', 
-        interval = 500, 
+        id = 'interval',
+        interval = 1,
         n_intervals=0,
         max_intervals=numFrames,
         disabled = False
@@ -121,7 +136,7 @@ app.layout = html.Div([
         max = numFrames,
         step = 1,
         value= 0,
-        dots = True,
+        dots = False,
         updatemode='drag'
     ),
     cyto.Cytoscape(
@@ -135,65 +150,140 @@ app.layout = html.Div([
 
 # app.config.suppress_callback_exceptions = True
 
-@app.callback(
+# @app.callback(
+#     Output('interval', 'n_intervals'),
+#     [Input('play-button', 'n_clicks')],
+#     [State('time-slider', 'value')]
+# )
+
+# def setn_interval(n_clicks, value):
+#     return value
+
+app.clientside_callback(
+    """
+    function(n_clicks, value) {
+        return value
+    }
+    """,
+    
     Output('interval', 'n_intervals'),
-    [Input('play-button', 'n_clicks')],
-    [State('time-slider', 'value')]
+    Input('play-button', 'n_clicks'),
+    State('time-slider', 'value')
 )
 
-def setn_interval(n_clicks, value):
-    return value
 
-@app.callback(
+# @app.callback(
+#     Output('time-slider', 'value'),
+#     [Input('interval', 'n_intervals')],
+#     # [State('time-slider', 'drag_value')]
+# )
+
+# def onInterval(n_intervals):
+#     return n_intervals
+
+app.clientside_callback(
+    """
+    function(n_intervals) {
+        return n_intervals
+    }
+    """,
+
     Output('time-slider', 'value'),
-    [Input('interval', 'n_intervals')],
-    # [State('time-slider', 'drag_value')]
+    Input('interval', 'n_intervals')
 )
 
-def onInterval(n_intervals):
-    return n_intervals
+# @app.callback(
+#     Output('interval', 'disabled'),
+#     [Input('play-button', 'n_clicks')]
+# )
 
-@app.callback(
+# def playPause (n_clicks):
+#     if n_clicks % 2 == 0:
+#         return True
+#     else:
+#         return False
+
+app.clientside_callback(
+    """
+    function(n_clicks){
+        if ((n_clicks % 2) == 0)
+            return true
+        else
+            return false
+    }
+    """,
+
     Output('interval', 'disabled'),
-    [Input('play-button', 'n_clicks')]
+    Input('play-button', 'n_clicks')
 )
 
-def playPause (n_clicks):
-    if n_clicks % 2 == 0:
-        return True
-    else:
-        return False
+# @app.callback(
+#     Output('playing?', 'children'),
+#     [Input('play-button', 'n_clicks')]
+# )
 
-@app.callback(
+# def playFeedback(n_clicks):
+#     if n_clicks % 2 == 0:
+#         return 'paused'
+#     else:
+#         return 'playing'
+
+app.clientside_callback(
+    """
+    function(n_clicks){
+        if ((n_clicks % 2) == 0)
+            return 'paused'
+        else
+            return 'playing'
+    }
+    """,
+
     Output('playing?', 'children'),
-    [Input('play-button', 'n_clicks')]
+    Input('play-button', 'n_clicks')
 )
 
-def playFeedback(n_clicks):
-    if n_clicks % 2 == 0:
-        return 'paused'
-    else:
-        return 'playing'
 
-# why isn't drag_value working
-@app.callback(
+# @app.callback(
+#     Output('cytoscape', 'elements'),
+#     [Input('time-slider', 'value')],
+#     [State('cytoscape', 'elements')]
+# )
+
+# def sliderFrame(value, elements):
+#     return frames[value] + formatEdge(edgeList)
+
+app.clientside_callback(
+    """
+    function(value, elements, frameData, edgeData){
+        return frameData[value].concat(edgeData)
+    }
+    """,
+
     Output('cytoscape', 'elements'),
-    [Input('time-slider', 'value')],
-    [State('cytoscape', 'elements')]
+    Input('time-slider', 'value'),
+    State('cytoscape', 'elements'),
+    State('frames', 'data'),
+    State('edgeList', 'data')
 )
 
-def sliderFrame(value, elements):
-    return frames[value] + formatEdge(edgeList)
+# @app.callback(
+#     Output('frame#', 'children'),
+#     [Input('time-slider', 'value')]
+# )
 
+# def sliderFrameNum(value):
+#     return 'frame# ' + str(value)
 
+app.clientside_callback(
+    """
+    function(value){
+        return 'frame# ' + String(value)
+    }
+    """,
 
-@app.callback(
     Output('frame#', 'children'),
-    [Input('time-slider', 'value')]
+    Input('time-slider', 'value')
 )
-
-def sliderFrameNum(value):
-    return 'frame# ' + str(value)
 
 if __name__ == '__main__':
     app.run_server(debug=True, port = 1111)
