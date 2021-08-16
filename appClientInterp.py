@@ -4,13 +4,14 @@ import dash_html_components as html
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
+# import dash_bootstrap_components as dbc
 import networkx as nx
 import os
 import pandas as pd
-from ipynbs.functions.springLayoutJN1 import fruchterman_reingold_layout_edit
-from ipynbs.functions.dashFunc import *
-from ipynbs.functions.cytoscapeFunctions import *
-from ipynbs.functions.edgeFunctions import *
+from funcs_notebooks.functions.springLayout import fruchterman_reingold_layout_edit
+from funcs_notebooks.functions.dashFunc import *
+from funcs_notebooks.functions.cytoscapeFunctions import *
+from funcs_notebooks.functions.edgeFunctions import *
 from _pytest import warnings
 import time
 
@@ -73,7 +74,7 @@ def networkExtract():
 
 
 gmpNetwork, progNetwork = networkExtract()
-addEdgeAttrib(gmpNetwork, 'weight', 0.5, 1)
+addEdgeAttrib(gmpNetwork, 'weight', 0.1, 1)
 # addEdgeAttrib(progNetwork, 'weight', 0.1, 1)
 # print(gmpNetwork.edges(data = True))
 # print(gmpNetwork.nodes(data = True))
@@ -82,29 +83,13 @@ addEdgeAttrib(gmpNetwork, 'weight', 0.5, 1)
 # print(convertNode(progNetwork))
 
 # gmpNetwork = nx.gnm_random_graph(2000,6000)
-numFrames = 10
+numFrames = 11
 startTime = time.time()
 origTime = time.time()
 print('')
 print('layout loading')
-origFrames = makeFrames(gmpNetwork, firstFrameStop=150, numFrames = numFrames, inIterations=1000, inPretendIterations=50, inStop = 15)
+origFrames = makeFrames(gmpNetwork, firstFrameStop=0, numFrames = numFrames, inIterations=1000, inPretendIterations=50, inStop = 25)
 print('FR layout applied', end = ' ')
-# print(time.time()-startTime)
-# startTime = time.time()
-# interpolatedFrames = []
-# numBetweenFrames = 1
-# for frame in range(numFrames-1):
-#     interpolatedFrames.extend(genBetweenFrames(origFrames[frame], origFrames[frame+1], numBetweenFrames))
-# print('interpolated', end = ' ')
-# print(time.time()-startTime)
-# startTime = time.time()
-
-# frames = formatPosList(gmpNetwork, interpolatedFrames, 1500, containsNodeData=True)
-# print(len(frames))
-# print('layout formatted', end = ' ')
-# print(time.time()-startTime)
-# startTime = time.time()
-# # print(frames[0])
 adjDict = nx.to_dict_of_lists(gmpNetwork)
 print('adjlist loaded', end = ' ')
 print(time.time()-startTime)
@@ -115,12 +100,13 @@ edgeList = [formatEdge(convertEdge(gmpNetwork))]
 addEdgeAttrib(gmpNetwork, 'weight', 0.1, 0.1)
 edgeList.append(formatEdge(convertEdge(gmpNetwork)))
 
-formatOrigFrames = formatPosList(gmpNetwork, origFrames, 1500, containsNodeData= True)
+formatOrigFrames = formatPosList(gmpNetwork, origFrames, 1250, containsNodeData = True)
+
 
 
 # timePoints = {0.0: formatOrigFrames[0],0.3: formatOrigFrames[1], 0.35: formatOrigFrames[2], 0.60: formatOrigFrames[3], 0.61: formatOrigFrames[4], 0.62: formatOrigFrames[5], 0.7: formatOrigFrames[6], 1.0: formatOrigFrames[7]}
 
-timePoints = {0.0: formatOrigFrames[0], 1.0: formatOrigFrames[9]}
+timePoints = {0.0: formatOrigFrames[0], 0.1: formatOrigFrames[1], 0.2: formatOrigFrames[2], 0.3: formatOrigFrames[3], 0.4: formatOrigFrames[4], 0.5: formatOrigFrames[5], 0.6: formatOrigFrames[6], 0.7: formatOrigFrames[7], 0.8: formatOrigFrames[8], 0.9: formatOrigFrames[9], 1.0: formatOrigFrames[10]}
 
 # print(list(timePoints.keys()))
 # print(edgeList[0])
@@ -144,20 +130,19 @@ myStylesheet = [
             'content': 'data(label)',
             'font-size': '40px',
             'text-color':'red',
-            'background-color': '#b74e0e',
-            'background-opacity': '0.8',
+            'background-color': 'maroon',
+            'background-opacity': '1',
             'outline': 'black',
-            'width': 50,
-            'height': 50,
+            'width': 70,
+            'height': 70,
         }
     },
     {
         'selector': 'edge',
         'style': {
-            'line-color' : 'mapData(weight, 0, 1, blue, red)',
-            'width' : 'mapData(weight,0,1,1,10)',
-            'opacity': 0.3,
-            'selectable': False,
+            'line-color' : 'mapData(weight, 0, 1, yellow, red)',
+            'width' : 'mapData(weight,0,1,0.5,5)',
+            'opacity': 'mapData(weight, 0, 1, 0.1, 0.5)',
             'grabbable': False
         }
     },
@@ -168,17 +153,7 @@ myStylesheet = [
             'content': 'data(label)',
             'font-size' : '50px'
         }
-    },
-    # {
-    #     'selector': '[weight > 5]',
-    #     'style': {
-    #         'line-color' : 'red',
-    #         'width': 5,
-    #         'opacity': 0.7,
-    #         # 'label': 'data(weight)'
-    #     }
-    # }
-    # SELECTED formatting
+    }
 ]
 
 
@@ -192,11 +167,11 @@ app.layout = html.Div([
         stylesheet=myStylesheet,
         minZoom=0.1,
         # wheelSensitivity= 0.5
-    ), 
+    ),
     dcc.Slider(
         id='time-slider1',
         min = 0,
-        max = 10000,
+        max = 100000,
         step = 1,
         value= 0,
         dots = False,
@@ -207,32 +182,11 @@ app.layout = html.Div([
          id='play-button1',
          n_clicks=0),
     html.Div(id = 'playing?'),
-    # html.Div(id = 'nodeHoverData'),
-    html.Div(id = 'nodeTapData'),
-    html.Div(id = 'nodeTapMoreData'),
     html.Div(id = 'elements'),
     html.Div(id = 'scrap1'),
     html.Div(id = 'timeList', children = 'times containing \'data\': ' + str(list(timePoints.keys()))),
-    cyto.Cytoscape(
-        id='cytoscape2',
-        layout={'name' :'preset'},
-        style={'width': '500px', 'height': '500px'},
-        elements=myElements,
-        stylesheet=myStylesheet,
-        minZoom=0.1,
-        # wheelSensitivity= 0.5
-    ),
-    # dcc.Slider(
-    #     id = 'time-slider2',
-    #     min = 0,
-    #     max = len(interpolatedFrames)-1,
-    #     step = 1,
-    #     value = 0,
-    #     dots = False,
-    #     updatemode = 'drag'
-    # ),
-    html.Div(id = 'scrap2'),
-    # dcc.Store(id = 'frames', storage_type='memory', data = frames),
+    html.Div(id = 'nodeTapData'),
+    html.Div(id = 'nodeTapMoreData'),
     dcc.Store(id = 'origFrames', storage_type = 'memory', data = formatOrigFrames),
     dcc.Store(id = 'edgeList', storage_type='memory', data = edgeList),
     dcc.Store(id = 'timePoints', storage_type='memory', data = timePoints),
@@ -240,14 +194,12 @@ app.layout = html.Div([
         id = 'interval',
         interval = 1,
         n_intervals=0,
-        max_intervals=10000,
+        max_intervals=100,
         disabled = True
     )
     
 ])
 
-
-# app.config.suppress_callback_exceptions = True
 
 @app.callback(
     Output('nodeTapData', 'children'),
@@ -258,7 +210,7 @@ def nodeTap(data):
     if data is None:
         return 'no node selected'
     else:
-        return 'name: ' + str(data['data']['id']) + '; type: ' + str(data['classes'])
+        return html.Br(), 'Selected Gene Name: ' + str(data['data']['id']), html.Br(),  'Selected Gene Type: ' + str(data['classes'])
 
 @app.callback(
     Output('nodeTapMoreData', 'children'),
@@ -273,65 +225,35 @@ def nodeTapln2(data):
         for edge in data['edgesData']:
             edges += edge['source'] + ' to ' + edge['target'] + '; '
         edges = edges[0: len(edges)-2]
-        return html.Br(), 'edges:', html.Br(), edges
-
-# @app.callback(
-#     Output('elements', 'children'),
-#     Input('cytoscape1', 'tapNode'),
-#     State('cytoscape1', 'elements')
-# )
-
-# def showAdj(node, elements):
-
-#     return str(elements[0])
-#     # return adjDict[str(node['data']['label'])]
-
-# @app.callback(
-#     Output('elements', 'children'),
-#     Input('cytoscape1', 'tapNode'),
-#     State('cytoscape1', 'elements')
-# )
-
-# def adjTest(node, elements):
-#     if node is not None:
-#         return str(next(item for item in elements if item['data']['id'] == str(node['data']['label'])))
-
-@app.callback(
-    Output('elements', 'children'),
-    Input('cytoscape1', 'tapNode'),
-    State('cytoscape1', 'elements')
-)
-
-def adjSelect(node, elements):
-    if node is not None:
-        # elements[0]['selected'] = True
-        # return str(next(item for item in elements if item['data']['id'] == str(node['data']['label'])))
-        return str(elements[next(index for (index, i) in enumerate(elements) if i['data']['id'] == str(node['data']['id']))])
-
+        return html.Br(), 'Selected Node edges:', html.Br(), edges, html.Br()
 
 
 app.clientside_callback(
     """
-    function(n_clicks, value) {
-        return value
+    function(n_clicks, value, max) {
+        let test = (value/max)*100
+        return parseInt(test)
     }
     """,
     
     Output('interval', 'n_intervals'),
     Input('play-button1', 'n_clicks'),
-    State('time-slider1', 'value')
+    State('time-slider1', 'value'),
+    State('time-slider1', 'max'),
 )
 
 
 app.clientside_callback(
     """
-    function(n_intervals) {
-        return n_intervals
+    function(n_intervals, max_intervals, max) {
+        return n_intervals*(max/max_intervals)
     }
     """,
 
     Output('time-slider1', 'value'),
-    Input('interval', 'n_intervals')
+    Input('interval', 'n_intervals'),
+    State('interval', 'max_intervals'),
+    State('time-slider1', 'max')
 )
 
 app.clientside_callback(
@@ -363,33 +285,6 @@ app.clientside_callback(
     Input('play-button1', 'n_clicks')
 )
 
-# app.clientside_callback(
-#     """
-#     function (value, max, frameData, edgeData){
-#         var test1 = document.getElementById('cytoscape1')
-
-#         if (test1 != 'undefined'){
-#             cyObject1 = test1._cyreg.cy
-#             cyObject1.nodes().positions(function(node,i){
-#                 var mult1 = value/max
-#                 var mult2 = 1-mult1
-#                 return {
-#                     x: frameData[0][i]['position']['x']*mult2 + frameData[frameData.length-1][i]['position']['x']*mult1,
-#                     y: frameData[0][i]['position']['y']*mult2 + frameData[frameData.length-1][i]['position']['y']*mult1
-#                 }
-#             })
-#         }
-#         return String(value/max)
-#     }
-#     """,
-
-#     Output('scrap1', 'children'),
-#     Input('time-slider1', 'value'),
-#     State('time-slider1', 'max'),
-#     State('frames', 'data'),
-#     State('edgeList', 'data'),
-# )
-
 app.clientside_callback(
     """
     function (value, max, frameData, edgeData, timePoints){
@@ -402,13 +297,6 @@ app.clientside_callback(
                 break
             }
         }
-
-        //take out later
-        console.log(String(timePointsKeys[beginTimePointIndex]) + ' to ' + String(timePointsKeys[beginTimePointIndex+1]))
-        console.log(timePointsKeys)
-        console.log(timePoints['0.0'][0]['position'])
-
-
         var percentBetween = ((value/max)-timePointsKeys[beginTimePointIndex])/(timePointsKeys[beginTimePointIndex+1] - timePointsKeys[beginTimePointIndex])
         if (test1 != 'undefined' && frameData[beginTimePointIndex+1] != null){
             cyObject1 = test1._cyreg.cy
@@ -418,12 +306,12 @@ app.clientside_callback(
                     y: frameData[beginTimePointIndex][i]['position']['y']*(1-percentBetween) + frameData[beginTimePointIndex+1][i]['position']['y']*(percentBetween)
                 }
             })
-        for (let edge = 0; edge < edgeData[beginTimePointIndex].length; edge++){
-            prevWeight = edgeData[beginTimePointIndex][edge]['data']['weight']
-            nextWeight = edgeData[beginTimePointIndex+1][edge]['data']['weight']
-            var avgWeight = prevWeight*(1-percentBetween) + nextWeight*(percentBetween)
-            cyObject1.edges()[edge].data('weight', avgWeight)
-        }
+        //for (let edge = 0; edge < edgeData[beginTimePointIndex].length; edge++){
+        //    prevWeight = edgeData[beginTimePointIndex][edge]['data']['weight']
+        //    nextWeight = edgeData[beginTimePointIndex+1][edge]['data']['weight']
+        //    var avgWeight = prevWeight*(1-percentBetween) + nextWeight*(percentBetween)
+        //    cyObject1.edges()[edge].data('weight', avgWeight)
+        // }
         }
         else if (test1 != 'undefined' && frameData[beginTimePointIndex+1] == null){
             cyObject1 = test1._cyreg.cy
@@ -446,79 +334,46 @@ app.clientside_callback(
     State('timePoints', 'data')
 )
 
-# app.clientside_callback(
-#     """
-#     function (value, elements, frameData, edgeData){
-#         var test2 = document.getElementById('cytoscape2')
-#         if (test2 != 'undefined'){
-#             cyObject2 = test2._cyreg.cy
-#             cyObject2.nodes().positions(function( node, i ){
-#                 return {
-#                     x: frameData[value][i]['position']['x'],
-#                     y: frameData[value][i]['position']['y']
-#                 }
-#             })
-#         }
-#         return 'test'
-#     }
-#     """,
-            
-#     Output('scrap2', 'children'),
-#     Input('time-slider2', 'value'),
-#     State('cytoscape2', 'elements'),
-#     State('frames', 'data'),
-#     State('edgeList', 'data')
-# )
-
-# @app.callback(
-#     Output('cytoscape1', 'elements'),
-#     Input('cytoscape1', 'tapNode'),
-#     State('cytoscape1', 'elements')
-# )
-
-# def adjTest(node, elements):
-#     if node is not None:
-#         tempNode = elements.pop(0)
-#         tempNode['selected'] = True
-#         elements.append(tempNode)
-#     return elements
 
 
-# @app.callback(
-#     # Output('cytoscape1', 'elements'),
-#     Output('cytoscape1', 'elements'),
-#     Input('cytoscape1', 'tapNode'),
-#     Input('time-slider1', 'value'),
-#     State('cytoscape1', 'elements'),
-#     State('frames', 'data'),
-#     State('edgeList', 'data')
-# )
+"""
+some commmented out code for adjacent node selecting - not in use currently
 
-# def selectAdjNodes(tapNode, value, elements, frameData, edgeData):
-#     if tapNode is None:
-#         return frameData[value] + edgeData
-#     else:
-#         nodeID = str(tapNode['data']['id'])
-#         nodeElemIndex = next(index for (index, i) in enumerate(elements) if i['data']['id'] == nodeID)
-#         nodeAdjList = adjDict[nodeID]
+@app.callback(
+    Output('elements', 'children'),
+    Input('cytoscape1', 'tapNode'),
+    State('cytoscape1', 'elements')
+)
 
-#         for node in nodeAdjList:
-#             nodeIndex = next(index for (index, i) in enumerate(elements) if i['data']['id'] == node)
-#             temp = elements.pop(nodeIndex)
-#             temp['selected'] = True
-#             elements.append(temp)
+def showAdj(node, elements):
 
-#         return elements
+    return str(elements[0])
+    # return adjDict[str(node['data']['label'])]
 
-# app.clientside_callback(
-#     """
-#     function(tapNode, value, elements, frameData, edgeData)
-#     """
-# )
+@app.callback(
+    Output('elements', 'children'),
+    Input('cytoscape1', 'tapNode'),
+    State('cytoscape1', 'elements')
+)
 
-        # tempNode['selected'] = True
-        # elements.append(tempNode)
-        # return elements
+def adjTest(node, elements):
+    if node is not None:
+        return str(next(item for item in elements if item['data']['id'] == str(node['data']['label'])))
+
+@app.callback(
+    Output('elements', 'children'),
+    Input('cytoscape1', 'tapNode'),
+    State('cytoscape1', 'elements')
+)
+
+def adjSelect(node, elements):
+    if node is not None:
+        # elements[0]['selected'] = True
+        # return str(next(item for item in elements if item['data']['id'] == str(node['data']['label'])))
+        return str(elements[next(index for (index, i) in enumerate(elements) if i['data']['id'] == str(node['data']['id']))])
+"""
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=True, port = 1111)
