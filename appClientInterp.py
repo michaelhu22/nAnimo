@@ -15,9 +15,6 @@ from funcs_notebooks.functions.edgeFunctions import *
 from _pytest import warnings
 import time
 
-# importing networks - kinda messy
-
-
 def networkExtract():
 
     networkFolder = os.path.join(os.path.dirname(
@@ -55,8 +52,6 @@ def networkExtract():
         progNetwork.add_edge(
             progEdgeDF['Regulator'][i], progEdgeDF['Target'][i])
 
-    # print(gmpOverlap, progOverlap)
-
     gmpNodeIndexDF = gmpNodeDF.set_index('Name')
     progNodeIndexDF = progNodeDF.set_index('Name')
 
@@ -64,25 +59,17 @@ def networkExtract():
     nx.set_node_attributes(gmpNetwork, gmpNodeIndexDF.to_dict('index'))
 
     gmpNetwork1 = gmpNetwork.copy()
-    # gmpNetwork1.remove_node('IRF7')
 
     nx.set_node_attributes(progNetwork, progNodeDF.to_dict('index'))
     nx.set_node_attributes(progNetwork, progNodeIndexDF.to_dict('index'))
-    # end of network import
 
     return gmpNetwork, progNetwork
 
 
 gmpNetwork, progNetwork = networkExtract()
 addEdgeAttrib(gmpNetwork, 'weight', 0.1, 1)
-# addEdgeAttrib(progNetwork, 'weight', 0.1, 1)
-# print(gmpNetwork.edges(data = True))
-# print(gmpNetwork.nodes(data = True))
 
-# print(convertNode(gmpNetwork))
-# print(convertNode(progNetwork))
 
-# gmpNetwork = nx.gnm_random_graph(2000,6000)
 numFrames = 11
 startTime = time.time()
 origTime = time.time()
@@ -94,7 +81,6 @@ adjDict = nx.to_dict_of_lists(gmpNetwork)
 print('adjlist loaded', end = ' ')
 print(time.time()-startTime)
 print('total time: ' + str(time.time() - origTime))
-# print(frames)
 
 edgeList = [formatEdge(convertEdge(gmpNetwork))]
 addEdgeAttrib(gmpNetwork, 'weight', 0.1, 0.1)
@@ -102,22 +88,13 @@ edgeList.append(formatEdge(convertEdge(gmpNetwork)))
 
 formatOrigFrames = formatPosList(gmpNetwork, origFrames, 1250, containsNodeData = True)
 
-
-
-# timePoints = {0.0: formatOrigFrames[0],0.3: formatOrigFrames[1], 0.35: formatOrigFrames[2], 0.60: formatOrigFrames[3], 0.61: formatOrigFrames[4], 0.62: formatOrigFrames[5], 0.7: formatOrigFrames[6], 1.0: formatOrigFrames[7]}
-
 timePoints = {0.0: formatOrigFrames[0], 0.1: formatOrigFrames[1], 0.2: formatOrigFrames[2], 0.3: formatOrigFrames[3], 0.4: formatOrigFrames[4], 0.5: formatOrigFrames[5], 0.6: formatOrigFrames[6], 0.7: formatOrigFrames[7], 0.8: formatOrigFrames[8], 0.9: formatOrigFrames[9], 1.0: formatOrigFrames[10]}
 
-# print(list(timePoints.keys()))
-# print(edgeList[0])
-# print(edgeList)
 myElements = formatOrigFrames[0] + edgeList[0]
 myStylesheet = [
     {
         'selector': '.normal',
         'style': {
-            # 'content': 'data(label)',
-            # 'font-size': '10px',
             'background-color': 'maroon',
             'background-opacity': '0.5',
             'width': 30,
@@ -166,7 +143,6 @@ app.layout = html.Div([
         elements=myElements,
         stylesheet=myStylesheet,
         minZoom=0.1,
-        # wheelSensitivity= 0.5
     ),
     dcc.Slider(
         id='time-slider1',
