@@ -65,11 +65,19 @@ will give a list of time points with given data. There are 11 data points spaced
 - dash cytoscape
 - random
 
+### Files/Folders
 The current usable file is "appClientInterp.py". The file "appDynamic.py" is being worked on, to allow dynamic networks to be visualized.
+
+The "networks" folder contains sample network data, in .tsv format
+
+The "funcs_notebooks" folder contains archived Jupyter Notebooks (.ipynb), as well as a "functions" folder which contains the library of python function files used in the visualization.
 
 
 ## WIP
 This program is currently still a work in progress. The network being used is utilizing generated edge weight data, and is a sample network being converged. Next steps will allow for full user-input dynamic network visualization and gene specific visualizations, along with other things.
+
+### Issues
+Please post questions/issues in the issues section
 
 ## Contact:
 Michael Hu
