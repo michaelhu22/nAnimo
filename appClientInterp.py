@@ -4,7 +4,6 @@ import dash_html_components as html
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-# import dash_bootstrap_components as dbc
 import networkx as nx
 import os
 import pandas as pd
@@ -71,16 +70,13 @@ addEdgeAttrib(gmpNetwork, 'weight', 0.1, 1)
 
 
 numFrames = 11
-startTime = time.time()
-origTime = time.time()
-print('')
-print('layout loading')
-origFrames = makeFrames(gmpNetwork, firstFrameStop=0, numFrames = numFrames, inIterations=1000, inPretendIterations=50, inStop = 25)
-print('FR layout applied', end = ' ')
+print(' ')
+print('Layout loading')
+origFrames = makeFrames(gmpNetwork, firstFrameStop=0, numFrames = numFrames, inIterations=1000, inPretendIterations=50, inStop = 30)
+print('FR layout applied')
 adjDict = nx.to_dict_of_lists(gmpNetwork)
-print('adjlist loaded', end = ' ')
-print(time.time()-startTime)
-print('total time: ' + str(time.time() - origTime))
+print('Adjlist loaded')
+print('Loaded!')
 
 edgeList = [formatEdge(convertEdge(gmpNetwork))]
 addEdgeAttrib(gmpNetwork, 'weight', 0.1, 0.1)
@@ -97,6 +93,8 @@ myStylesheet = [
         'style': {
             'background-color': 'maroon',
             'background-opacity': '0.5',
+            'content': 'data(label)',
+            'font-size': '10px',
             'width': 30,
             'height':30
         }
@@ -106,29 +104,38 @@ myStylesheet = [
         'style': {
             'content': 'data(label)',
             'font-size': '40px',
-            'text-color':'red',
             'background-color': 'maroon',
-            'background-opacity': '1',
+            'background-opacity': '0.7',
             'outline': 'black',
-            'width': 70,
-            'height': 70,
+            'width': 50,
+            'height': 50,
         }
     },
     {
         'selector': 'edge',
         'style': {
-            'line-color' : 'mapData(weight, 0, 1, yellow, red)',
-            'width' : 'mapData(weight,0,1,0.5,5)',
-            'opacity': 'mapData(weight, 0, 1, 0.1, 0.5)',
+            'line-color' : 'mapData(weight, 0.1, 1, yellow, red)',
+            'width' : 'mapData(weight,0.1,1,0.5,5)',
+            'opacity': 'mapData(weight, 0.1, 1, 0.1, 0.5)',
             'grabbable': False
         }
     },
     {
-        'selector': ':selected',
+        'selector': 'edge:selected',
         'style': {
             'background-color': 'purple',
+            'content': 'data(weight)',
+            'font-size' : '50px',
+            'opacity': 1
+        }
+    },
+     {
+        'selector': 'node:selected',
+        'style': {
+            'background-color': '#430022',
             'content': 'data(label)',
-            'font-size' : '50px'
+            'font-size' : '75px',
+            'background-opacity': '0.9',
         }
     }
 ]
@@ -139,10 +146,14 @@ app.layout = html.Div([
     cyto.Cytoscape(
         id='cytoscape1',
         layout={'name' :'preset'},
-        style={'width': '800px', 'height': '500px'},
+        style={'width': '100%', 'height': '500px'},
         elements=myElements,
         stylesheet=myStylesheet,
         minZoom=0.1,
+    ),
+    html.Div(
+        id = 'slider-label',
+        children = 'Time Slider'
     ),
     dcc.Slider(
         id='time-slider1',
@@ -154,13 +165,14 @@ app.layout = html.Div([
         updatemode='drag'
     ),
     html.Button(
-        'play/pause',
+        'Play/Pause',
          id='play-button1',
          n_clicks=0),
     html.Div(id = 'playing?'),
+    html.Div(id = 'spacer', children = " "),
     html.Div(id = 'elements'),
     html.Div(id = 'scrap1'),
-    html.Div(id = 'timeList', children = 'times containing \'data\': ' + str(list(timePoints.keys()))),
+    html.Div(id = 'timeList', children = 'Time points containing data: ' + str(list(timePoints.keys()))[1:-1]),
     html.Div(id = 'nodeTapData'),
     html.Div(id = 'nodeTapMoreData'),
     dcc.Store(id = 'origFrames', storage_type = 'memory', data = formatOrigFrames),
@@ -201,7 +213,7 @@ def nodeTapln2(data):
         for edge in data['edgesData']:
             edges += edge['source'] + ' to ' + edge['target'] + '; '
         edges = edges[0: len(edges)-2]
-        return html.Br(), 'Selected Node edges:', html.Br(), edges, html.Br()
+        return html.Br(), str(data['data']['id']), '\'s edges:', html.Br(), edges, html.Br()
 
 
 app.clientside_callback(
@@ -251,9 +263,9 @@ app.clientside_callback(
     """
     function(n_clicks){
         if ((n_clicks % 2) == 0)
-            return 'paused'
+            return 'Paused'
         else
-            return 'playing'
+            return 'Playing'
     }
     """,
 
@@ -298,7 +310,7 @@ app.clientside_callback(
                 }
             })
         }
-        return 'total bar filled: ' + (value/max).toPrecision(2) + ' --- percent filled between times ' + String(timePointsKeys[beginTimePointIndex]) + ' to ' + String(timePointsKeys[beginTimePointIndex+1]) + ': ' + (percentBetween*100).toPrecision(4) + '%' 
+        return 'Total bar filled: ' + ((value/max)*100).toPrecision(4) + '% ----- Percent filled between times ' + String(timePointsKeys[beginTimePointIndex]) + ' to ' + String(timePointsKeys[beginTimePointIndex+1]) + ': ' + (percentBetween*100).toPrecision(4) + '%' 
     }
     """,
 
@@ -352,4 +364,4 @@ def adjSelect(node, elements):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port = 1111)
+    app.run_server(debug=True, port = '1111')

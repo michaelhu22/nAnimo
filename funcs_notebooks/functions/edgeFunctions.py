@@ -1,6 +1,8 @@
 
-
-# functions used to format and converge networkx edge data
+"""
+edgeFunctions.py:
+functions used to format and converge networkx edge data, in single networks or between multiple networks
+"""
 
 from py2cytoscape import cyrest
 import networkx as nx

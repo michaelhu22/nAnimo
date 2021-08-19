@@ -1,6 +1,8 @@
 
-
-# In[1]:
+"""
+springLayout.py:
+Edited NetworkX functions used to generate layouts for visualization.
+"""
 import networkx as nx
 from decorator import decorator
 import os
@@ -8,21 +10,8 @@ import pandas as pd
 from _pytest import warnings
 from IPython.core.getipython import get_ipython
 
-# get_ipython().run_line_magic('run', 'functions/cytoscapeFunctions')
-# get_ipython().run_line_magic('run', 'functions/edgeFunctions')
-
-
-# In[2]:
-
-
 import numpy as np
 
-
-
-# In[4]:
-
-
-# random necessary functions
 
 def create_random_state(random_state=None):
     """Returns a numpy.random.RandomState instance depending on input.
@@ -115,17 +104,6 @@ class PythonRandomInterface:
     def paretovariate(self, shape):
         return self._rng.pareto(shape)
 
-
-#    weibull as weibullvariate multiplied by beta,
-#    def weibullvariate(self, alpha, beta):
-#        return self._rng.weibull(alpha) * beta
-#
-#    def triangular(self, low, high, mode):
-#        return self._rng.triangular(low, mode, high)
-#
-#    def choices(self, seq, weights=None, cum_weights=None, k=1):
-#        return self._rng.choice(seq
-
 def random_state(random_state_index):
     """Decorator to generate a numpy.random.RandomState instance.
     Argument position `random_state_index` is processed by create_random_state.
@@ -207,11 +185,6 @@ def rescale_layout(pos, scale=1):
     if lim > 0:
         for i in range(pos.shape[1]):
             pos[:, i] *= scale / lim
-    return pos
-
-
-# In[5]:
-
 
 @random_state(10)
 def fruchterman_reingold_layout_edit(
@@ -219,17 +192,29 @@ def fruchterman_reingold_layout_edit(
     k=None,
     pos=None,
     fixed=None,
-    iterations=50,
+    iterations=1000,
     threshold=1e-4,
     weight="weight",
     scale=1,
     center=None,
     dim=2,
     seed=None,
-    pretendIterations=None,
+    pretendIterations=50,
     stop = None
 ):
-    """Position nodes using Fruchterman-Reingold force-directed algorithm.
+    """
+    This is an edited version of the Fruchterman-Reingold layout function. (from networkx import fruchterman_reingold_layout)
+    This function allows the user to get layout information before it fully converges with the "stop" parameter
+    The function also allows for finer steps for each iteration using "iterations" and "pretendIterations"
+
+    pretendIterations (int) = the max number of iterations run in the original function; the ratio of pretendIterations/iterations is the ratio of step sizes between the edited and original functions
+    
+    stop (int) = the number of iterations run before the returned layout stops prematurely
+
+
+    Documention below is from the original FR function:
+
+    Position nodes using Fruchterman-Reingold force-directed algorithm.
     The algorithm simulates a force-directed representation of the network
     treating edges as springs holding nodes close, while treating nodes
     as repelling objects, sometimes called an anti-gravity force.
@@ -294,10 +279,6 @@ def fruchterman_reingold_layout_edit(
     import numpy as np
 
     G, center = _process_params(G, center, dim)
-    
-#     if pretendIterations is None:
-#         pretendIterations = iterations
-    
     if fixed is not None:
         if pos is None:
             raise ValueError("nodes are fixed without positions given")
@@ -325,20 +306,6 @@ def fruchterman_reingold_layout_edit(
         return {}
     if len(G) == 1:
         return {nx.utils.arbitrary_element(G.nodes()): center}
-
-#     try:
-#         # Sparse matrix
-#         if len(G) < 500:  # sparse solver for large graphs
-#             raise ValueError
-#         A = nx.to_scipy_sparse_matrix(G, weight=weight, dtype="f")
-#         if k is None and fixed is not None:
-#             # We must adjust k by domain size for layouts not near 1x1
-#             nnodes, _ = A.shape
-#             k = dom_size / np.sqrt(nnodes)
-#         pos = _sparse_fruchterman_reingold(
-#             A, k, pos_arr, fixed, iterations, threshold, dim, seed
-#         )
-#     except ValueError:
     A = nx.to_numpy_array(G, weight=weight)
     if k is None and fixed is not None:
         # We must adjust k by domain size for layouts not near 1x1
@@ -357,15 +324,10 @@ def fruchterman_reingold_layout_edit(
 spring_layout = fruchterman_reingold_layout_edit
 
 
-# In[6]:
-
-
 @random_state(7)
 def _fruchterman_reingold_edit(
     A, k=None, pos=None, fixed=None, iterations=50, threshold=1e-4, dim=2, seed=None, pretendIterations = None, stop = None
 ):
-    # Position nodes in adjacency matrix A using Fruchterman-Reingold
-    # Entry point for NetworkX graph is fruchterman_reingold_layout()
     import numpy as np
 
     try:

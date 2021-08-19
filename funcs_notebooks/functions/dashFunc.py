@@ -1,6 +1,8 @@
 
-# Functions used to generate and convert data to Dash Cytoscape readable formats
-
+"""
+dashFunc.py:
+Functions used to generate and convert data to Dash Cytoscape readable formats
+"""
 
 from funcs_notebooks.functions.springLayout import fruchterman_reingold_layout_edit
 import numpy as np

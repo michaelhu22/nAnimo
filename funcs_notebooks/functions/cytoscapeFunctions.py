@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
-
-# functions to format networkX Graph data and interface with Cytoscape
+"""
+cytoscapeFunctions.py
+functions to format networkX Graph data and interface with the Cytoscape software
+"""
 
 from py2cytoscape import cyrest
 import networkx as nx
