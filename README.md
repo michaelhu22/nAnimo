@@ -1,17 +1,17 @@
-name
+#name
 
-Background
+##Background
 name is a network visualization program that visualizes Dynamic Networks. Initially made to visualize reconstructed dynamic networks. name solves the problem of visualizing a Dynamic Network in easy-to-read layouts with relevant data. The program takes into account time and weight data to generate a moving visualization.
 
 
-"Basic Properties" (different name?)
+##"Basic Properties" (different name?)
 This program is primarily written in Python, with JavaScript used for webpage functions. It uses Dash Cytoscape as well as cytoscape.js to visualize the network on the webpage, as well as NetworkX to organize network info and layout function. name does not require any additional applications to use, as the entire visualization is browser based.
 
 This visualization uses a Force Directed Layout, (more specifically a Frucherman Reingold layout) to visualize the network in the least busy way possible. Using multiple data points, and generating layouts for each point, the visualization uses given information as well as interpolation to generate a smooth visualization animation of a given network.
 
 
 Getting Started (User):
-Dependancies: 
+###Dependencies: 
 - Python 3.8 or later
 - NetworkX
 - Pandas
@@ -21,7 +21,9 @@ Dependancies:
 - random
 
 In command prompt, set directory to where you downloaded the program, and use 
+
     python appClientInterp.py
+
 in command line to have the visualization on your browser. The address should show up in command prompt in the Dash blurb; it should say: "Dash is running on [webpage address]" (The port should be set to 1111).
 
 Loading messages will on the command prompt starting with "Layout loading". The layouts and other data is loaded on the webpage once you see the "Loaded!" message run.
@@ -38,18 +40,18 @@ Moving the slider will allow you to see the network moving through "time". Curre
 
 Underneath the Play/Pause Button, there is some info on the time data. The time parameter goes from 0 to 1, with any number of data points in between. Currently, there are 11 sample data points evenly spaced through time. Every other network layout is interpolated from the given data.
 
-    "Total bar filled" 
+    "Total bar filled":
 will give the percentage of the slider filled, and also represent how far in time from 0% to 100% the displayed network is.
 
-    "Percent filled between times [time] and [time]" 
+    "Percent filled between times [time point] and [time point]":
 will give how far between two data points the current network is.
 
-    "Time points containing data" 
+    "Time points containing data":
 will give a list of time points with given data. There are 11 data points spaced through times 0 to 1 in this current sample network.
 
 
-Getting Started (developer)
-Dependancies: 
+##Getting Started (developer)
+###Dependencies: 
 - Python 3.8 or later
 - NetworkX
 - Pandas
@@ -61,9 +63,9 @@ Dependancies:
 The current usable file is "appClientInterp.py". The file "appDynamic.py" is being worked on, to allow dynamic networks to be visualized.
 
 
-
+##WIP
 This program is currently still a work in progress. The network being used is utilizing generated edge weight data, and is a sample network being converged. Next steps will allow for full user-input dynamic network visualization and gene specific visualizations, along with other things.
 
-Contact:
+##Contact:
 Michael Hu
 michaelhu218@gmail.com
