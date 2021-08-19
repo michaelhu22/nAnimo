@@ -3,7 +3,6 @@ name
 Background
 name is a network visualization program that visualizes Dynamic Networks. Initially made to visualize reconstructed dynamic networks. name solves the problem of visualizing a Dynamic Network in easy-to-read layouts with relevant data. The program takes into account time and weight data to generate a moving visualization.
 
-what it is
 
 "Basic Properties" (different name?)
 This program is primarily written in Python, with JavaScript used for webpage functions. It uses Dash Cytoscape as well as cytoscape.js to visualize the network on the webpage, as well as NetworkX to organize network info and layout function. name does not require any additional applications to use, as the entire visualization is browser based.
@@ -13,62 +12,58 @@ This visualization uses a Force Directed Layout, (more specifically a Frucherman
 
 Getting Started (User):
 Dependancies: 
-    - Python 3.8 or later
-    - NetworkX
-    - Pandas
-    - numpy
-    - dash
-    - dash cytoscape
-    - random
+- Python 3.8 or later
+- NetworkX
+- Pandas
+- numpy
+- dash
+- dash cytoscape
+- random
 
-    In command prompt, set directory to where you downloaded the program, and use "python appClientInterp.py" in command line to have the visualization on your browser. The address should show up in command prompt in the Dash blurb; it should say: "Dash is running on [webpage address]" (The port should be set to 1111).
+In command prompt, set directory to where you downloaded the program, and use 
+    python appClientInterp.py
+in command line to have the visualization on your browser. The address should show up in command prompt in the Dash blurb; it should say: "Dash is running on [webpage address]" (The port should be set to 1111).
 
-    Loading messages will on the command prompt starting with "Layout loading". The layouts and other data is loaded on the webpage once you see the "Loaded!" message run.
+Loading messages will on the command prompt starting with "Layout loading". The layouts and other data is loaded on the webpage once you see the "Loaded!" message run.
 
-    Once loaded into the webpage, there will be a network of nodes and edges in a square-ish shape; this is the network with random node loactions, before converged. You may interact with the network now! Each node represents a gene, and each edge represents a relationship between two genes. Larger labeled nodes are Transcription Factors (TFs), while small unlabeled (or small text labeled) nodes are normal genes. The strength between genes can be observed through edge visuals alone: thicker/redder edges denote stronger weight, while thinner/yellower edges denote less weight. Stronger edge weight means a stronger gene-gene relationship.
+Once loaded into the webpage, there will be a network of nodes and edges in a square-ish shape; this is the network with random node loactions, before converged. You may interact with the network now! Each node represents a gene, and each edge represents a relationship between two genes. Larger labeled nodes are Transcription Factors (TFs), while small unlabeled (or small text labeled) nodes are normal genes. The strength between genes can be observed through edge visuals alone: thicker/redder edges denote stronger weight, while thinner/yellower edges denote less weight. Stronger edge weight means a stronger gene-gene relationship.
 
-    You may also interact with the network, and get more info on the genes being shown. Nodes can be moved around with the mouse. Dragging along an empty space allows panning, and scrolling lets you zoom in and out.
+You may also interact with the network, and get more info on the genes being shown. Nodes can be moved around with the mouse. Dragging along an empty space allows panning, and scrolling lets you zoom in and out.
 
-        Clicking on a node will highlight it, and provide information on the node and its relationships at the bottom of the webpage. The gene's name, type, and edges will be given. 
+Clicking on a node will highlight it, and provide information on the node and its relationships at the bottom of the webpage. The gene's name, type, and edges will be given. 
 
-        Clicking on an edge will label its weight, from a scale of 0 to 1. Currently, edge weights are randomly generated, as the current data is a sample network. Edge weights will still affect the overall layout, though.
+Clicking on an edge will label its weight, from a scale of 0 to 1. Currently, edge weights are randomly generated, as the current data is a sample network. Edge weights will still affect the overall layout, though.
 
-    Moving the slider will allow you to see the network moving through "time". Currently, the network is just converging to a Frucherman Reingold layout. Alternatively, there is a Play/Pause button to play the network. Since the layout is Force directed, so you will see larger-weight edges pulling nodes stronger than smaller-weight edges.
+Moving the slider will allow you to see the network moving through "time". Currently, the network is just converging to a Frucherman Reingold layout. Alternatively, there is a Play/Pause button to play the network. Since the layout is Force directed, so you will see larger-weight edges pulling nodes stronger than smaller-weight edges.
 
-    Underneath the Play/Pause Button, there is some info on the time data. The time parameter goes from 0 to 1, with any number of data points in between. Currently, there are 11 sample data points evenly spaced through time. Every other network layout is interpolated from the given data.
+Underneath the Play/Pause Button, there is some info on the time data. The time parameter goes from 0 to 1, with any number of data points in between. Currently, there are 11 sample data points evenly spaced through time. Every other network layout is interpolated from the given data.
 
-        "Total bar filled" will give the percentage of the slider filled, and also represent how far in time from 0% to 100% the displayed network is.
+    "Total bar filled" 
+will give the percentage of the slider filled, and also represent how far in time from 0% to 100% the displayed network is.
 
-        "Percent filled between times [time] and [time]" will give how far between two data points the current network is.
+    "Percent filled between times [time] and [time]" 
+will give how far between two data points the current network is.
 
-        "Time points containing data" will give a list of time points with given data. There are 11 data points spaced through times 0 to 1 in this current sample network.
+    "Time points containing data" 
+will give a list of time points with given data. There are 11 data points spaced through times 0 to 1 in this current sample network.
 
 
 Getting Started (developer)
-    Dependancies: 
-        - Python 3.8 or later
-        - NetworkX
-        - Pandas
-        - numpy
-        - dash
-        - dash cytoscape
-        - random
+Dependancies: 
+- Python 3.8 or later
+- NetworkX
+- Pandas
+- numpy
+- dash
+- dash cytoscape
+- random
 
-    The current usable file is "appClientInterp.py". The file "appDynamic.py" is being worked on, to allow dynamic networks to be visualized.
+The current usable file is "appClientInterp.py". The file "appDynamic.py" is being worked on, to allow dynamic networks to be visualized.
 
-what it solves - how to animate/visualize in the most readable way, uses layout function
-basic properties - language, framework, web based/application based?
-motivations
 
-tutorial for users: how to run it, run it, go to browser and can click on nodes and other stuff. can insert screenshots, choose dif networks and random edge weights
-    - dependancy list
-        - python packages needed
-
-tutorial for developer - which files, where to start - files and stuff
 
 This program is currently still a work in progress. The network being used is utilizing generated edge weight data, and is a sample network being converged. Next steps will allow for full user-input dynamic network visualization and gene specific visualizations, along with other things.
 
-
-wip, currently sample stuff, converging only
-
-contact
+Contact:
+Michael Hu
+michaelhu218@gmail.com
