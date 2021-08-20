@@ -185,6 +185,7 @@ def rescale_layout(pos, scale=1):
     if lim > 0:
         for i in range(pos.shape[1]):
             pos[:, i] *= scale / lim
+    return pos
 
 @random_state(10)
 def fruchterman_reingold_layout_edit(
