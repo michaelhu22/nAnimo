@@ -14,8 +14,10 @@ from funcs_notebooks.functions.edgeFunctions import *
 from _pytest import warnings
 import time
 
+# extracting network data from the "networks" folder
 def networkExtract():
 
+    # setting path to network data files
     networkFolder = os.path.join(os.path.dirname(
         os.path.abspath("template.cys")), 'networks')
 
@@ -28,6 +30,7 @@ def networkExtract():
     ProgEdge = os.path.join(Prog, 'edge.tsv')
     ProgNode = os.path.join(Prog, 'node.tsv')
 
+    # reading network data
     gmpEdgeDF = pd.read_csv(GMPedge, delimiter='\t')
     gmpNodeDF = pd.read_csv(GMPnode, delimiter='\t')
     progEdgeDF = pd.read_csv(ProgEdge, delimiter='\t')
@@ -64,28 +67,34 @@ def networkExtract():
 
     return gmpNetwork, progNetwork
 
-
+# creating networks
 gmpNetwork, progNetwork = networkExtract()
+
+#adding edge weights to gmpNetwork
 addEdgeAttrib(gmpNetwork, 'weight', 0.1, 1)
 
 
 numFrames = 11
 print(' ')
 print('Layout loading')
+# creating 11 frames, each converged inStop more than the last
 origFrames = makeFrames(gmpNetwork, firstFrameStop=0, numFrames = numFrames, inIterations=1000, inPretendIterations=50, inStop = 30)
 print('FR layout applied')
+# getting adjacency info of the network for data on webpage
 adjDict = nx.to_dict_of_lists(gmpNetwork)
 print('Adjlist loaded')
 print('Loaded!')
 
+# setting edges to Dash readable format
 edgeList = [formatEdge(convertEdge(gmpNetwork))]
-addEdgeAttrib(gmpNetwork, 'weight', 0.1, 0.1)
-edgeList.append(formatEdge(convertEdge(gmpNetwork)))
 
+# setting frames with node location data to Dash readable format
 formatOrigFrames = formatPosList(gmpNetwork, origFrames, 1250, containsNodeData = True)
 
+# creating dict of time:data
 timePoints = {0.0: formatOrigFrames[0], 0.1: formatOrigFrames[1], 0.2: formatOrigFrames[2], 0.3: formatOrigFrames[3], 0.4: formatOrigFrames[4], 0.5: formatOrigFrames[5], 0.6: formatOrigFrames[6], 0.7: formatOrigFrames[7], 0.8: formatOrigFrames[8], 0.9: formatOrigFrames[9], 1.0: formatOrigFrames[10]}
 
+# setting initial elements for Dash
 myElements = formatOrigFrames[0] + edgeList[0]
 myStylesheet = [
     {
@@ -188,7 +197,7 @@ app.layout = html.Div([
     
 ])
 
-
+# callback to display node data
 @app.callback(
     Output('nodeTapData', 'children'),
     Input('cytoscape1', 'tapNode')
@@ -200,6 +209,7 @@ def nodeTap(data):
     else:
         return html.Br(), 'Selected Gene Name: ' + str(data['data']['id']), html.Br(),  'Selected Gene Type: ' + str(data['classes'])
 
+# callback to display more node data
 @app.callback(
     Output('nodeTapMoreData', 'children'),
     Input('cytoscape1', 'tapNode')
@@ -216,6 +226,7 @@ def nodeTapln2(data):
         return html.Br(), str(data['data']['id']), '\'s edges:', html.Br(), edges, html.Br()
 
 
+# callback to set dash interval based on slider position for playing slider
 app.clientside_callback(
     """
     function(n_clicks, value, max) {
@@ -230,7 +241,7 @@ app.clientside_callback(
     State('time-slider1', 'max'),
 )
 
-
+# callback to set slider value based on changing interval for playing
 app.clientside_callback(
     """
     function(n_intervals, max_intervals, max) {
@@ -244,6 +255,7 @@ app.clientside_callback(
     State('time-slider1', 'max')
 )
 
+# callback to check button playing or not
 app.clientside_callback(
     """
     function(n_clicks){
@@ -258,7 +270,7 @@ app.clientside_callback(
     Input('play-button1', 'n_clicks')
 )
 
-
+# callback to display whether playing or not
 app.clientside_callback(
     """
     function(n_clicks){
@@ -273,6 +285,7 @@ app.clientside_callback(
     Input('play-button1', 'n_clicks')
 )
 
+# callback to interpolate node and edge(commented out) data as user moves slider
 app.clientside_callback(
     """
     function (value, max, frameData, edgeData, timePoints){
