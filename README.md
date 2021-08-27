@@ -66,7 +66,7 @@ will give a list of time points with given data. There are 11 data points spaced
 - random
 
 ### Files/Folders
-The current usable file is "appClientInterp.py". The file "appDynamic.py" is being worked on, to allow dynamic networks to be visualized.
+The current usable file is "appClientInterp.py". The file "appDynamic.py" is being worked on, to allow dynamic networks to be visualized. "appStressTest.py" is similar to "appClientside.py", just using a large 2000 node and 6000 edge network. Will take longer to run.
 
 The "networks" folder contains sample network data, in .tsv format
 
