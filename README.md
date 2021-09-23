@@ -1,11 +1,11 @@
-# name
+# nAnimo
 
 ## Background
-name is a network visualization program that visualizes Dynamic Networks. Initially made to visualize reconstructed dynamic networks. name solves the problem of visualizing a Dynamic Network in easy-to-read layouts with relevant data. The program takes into account time and weight data to generate a moving visualization.
+nAnimo is a network visualization program that visualizes Dynamic Networks. Initially made to visualize reconstructed dynamic networks. nAnimo solves the problem of visualizing a Dynamic Network in easy-to-read layouts with relevant data. The program takes into account time and weight data to generate a moving visualization.
 
 
-## "Basic Properties" (different name?)
-This program is primarily written in Python, with JavaScript used for webpage functions. It uses Dash Cytoscape as well as cytoscape.js to visualize the network on the webpage, as well as NetworkX to organize network info and layout function. name does not require any additional applications to use, as the entire visualization is browser based.
+## Basic Properties
+This program is primarily written in Python, with JavaScript used for webpage functions. It uses Dash Cytoscape as well as cytoscape.js to visualize the network on the webpage, as well as NetworkX to organize network info and layout function. nAnimo does not require any additional applications to use, as the entire visualization is browser based.
 
 This visualization uses a Force Directed Layout, (more specifically a Frucherman Reingold layout) to visualize the network in the least busy way possible. Using multiple data points, and generating layouts for each point, the visualization uses given information as well as interpolation to generate a smooth visualization animation of a given network.
 
