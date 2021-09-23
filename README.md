@@ -3,16 +3,16 @@
 - [nAnimo](#nanimo)
   * [Background](#background)
   * [Basic Properties](#basic-properties)
-  * [Getting Started (User)](#getting-started--user-)
+  * [Getting Started for Users](#getting-started-for-users)
     + [Dependencies](#dependencies)
     + [Run](#run)
     + [Overview](#overview)
     + [Interaction](#interaction)
       - [Network/Data](#network-data)
       - [Moving Visualization](#moving-visualization)
-  * [Getting Started (developer)](#getting-started--developer-)
+  * [Getting Started for Devs](#getting-started-for-devs)
     + [Dependencies](#dependencies-1)
-    + [Files/Folders](#files-folders)
+    + [Files and Folders](#files-and-folders)
   * [WIP](#wip)
   * [Issues](#issues)
   * [Contact](#contact)
@@ -27,7 +27,7 @@ This program is primarily written in Python, with JavaScript used for webpage fu
 This visualization uses a Force Directed Layout, (more specifically a Frucherman Reingold layout) to visualize the network in the least busy way possible. Using multiple data points, and generating layouts for each point, the visualization uses given information as well as interpolation to generate a smooth visualization animation of a given network.
 
 
-## Getting Started (User)
+## Getting Started for Users
 ### Dependencies
 - Python 3.8 or later
 - NetworkX
@@ -72,7 +72,7 @@ will give how far between two data points the current network is.
 will give a list of time points with given data. There are 11 data points spaced through times 0 to 1 in this current sample network.
 
 
-## Getting Started (developer)
+## Getting Started for Devs
 ### Dependencies
 - Python 3.8 or later
 - NetworkX
@@ -82,7 +82,7 @@ will give a list of time points with given data. There are 11 data points spaced
 - dash cytoscape
 - random
 
-### Files/Folders
+### Files and Folders
 The current usable file is "appClientInterp.py". The file "appDynamic.py" is being worked on, to allow dynamic networks to be visualized. "appStressTest.py" is similar to "appClientside.py", just using a large 2000 node and 6000 edge network. Will take longer to run.
 
 The "networks" folder contains sample network data, in .tsv format
