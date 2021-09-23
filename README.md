@@ -3,19 +3,19 @@
 - [nAnimo](#nanimo)
   * [Background](#background)
   * [Basic Properties](#basic-properties)
-  * [Getting Started (User)](#getting-started--user--)
-    + [Dependencies](#dependencies-)
+  * [Getting Started (User)](#getting-started--user-)
+    + [Dependencies](#dependencies)
     + [Run](#run)
     + [Overview](#overview)
     + [Interaction](#interaction)
       - [Network/Data](#network-data)
       - [Moving Visualization](#moving-visualization)
   * [Getting Started (developer)](#getting-started--developer-)
-    + [Dependencies:](#dependencies--1)
+    + [Dependencies](#dependencies-1)
     + [Files/Folders](#files-folders)
   * [WIP](#wip)
   * [Issues](#issues)
-  * [Contact](#contact-)
+  * [Contact](#contact)
 
 ## Background
 nAnimo is a network visualization program that visualizes Dynamic Networks. Initially made to visualize reconstructed dynamic networks. nAnimo solves the problem of visualizing a Dynamic Network in easy-to-read layouts with relevant data. The program takes into account time and weight data to generate a moving visualization.
@@ -27,8 +27,8 @@ This program is primarily written in Python, with JavaScript used for webpage fu
 This visualization uses a Force Directed Layout, (more specifically a Frucherman Reingold layout) to visualize the network in the least busy way possible. Using multiple data points, and generating layouts for each point, the visualization uses given information as well as interpolation to generate a smooth visualization animation of a given network.
 
 
-## Getting Started (User):
-### Dependencies: 
+## Getting Started (User)
+### Dependencies
 - Python 3.8 or later
 - NetworkX
 - Pandas
@@ -73,7 +73,7 @@ will give a list of time points with given data. There are 11 data points spaced
 
 
 ## Getting Started (developer)
-### Dependencies: 
+### Dependencies
 - Python 3.8 or later
 - NetworkX
 - Pandas
@@ -96,6 +96,6 @@ This program is currently still a work in progress. The network being used is ut
 ## Issues
 Please post questions/issues in the issues section
 
-## Contact:
+## Contact
 Michael Hu
 michaelhu218@gmail.com
