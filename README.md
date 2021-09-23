@@ -1,5 +1,22 @@
 # nAnimo
 
+- [nAnimo](#nanimo)
+  * [Background](#background)
+  * [Basic Properties](#basic-properties)
+  * [Getting Started (User):](#getting-started--user--)
+    + [Dependencies:](#dependencies-)
+    + [Run](#run)
+    + [Overview](#overview)
+    + [Interaction](#interaction)
+      - [Network/Data](#network-data)
+      - [Moving Visualization](#moving-visualization)
+  * [Getting Started (developer)](#getting-started--developer-)
+    + [Dependencies:](#dependencies--1)
+    + [Files/Folders](#files-folders)
+  * [WIP](#wip)
+  * [Issues](#issues)
+  * [Contact:](#contact-)
+
 ## Background
 nAnimo is a network visualization program that visualizes Dynamic Networks. Initially made to visualize reconstructed dynamic networks. nAnimo solves the problem of visualizing a Dynamic Network in easy-to-read layouts with relevant data. The program takes into account time and weight data to generate a moving visualization.
 
