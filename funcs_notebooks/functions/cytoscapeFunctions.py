@@ -2,7 +2,7 @@
 # coding: utf-8
 """
 cytoscapeFunctions.py
-functions to format networkX Graph data and interface with the Cytoscape software
+Functions to format networkX Graph data and interface with the Cytoscape software (Some functions require the Cytoscape app running to work)
 """
 
 from py2cytoscape import cyrest
