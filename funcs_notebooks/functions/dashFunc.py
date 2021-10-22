@@ -101,16 +101,3 @@ def formatPosList(network, posList, multiplier, containsNodeData):
         dashList.append(formatPos(network.nodes(data = True), posList[frame], multiplier, containsNodeData))
         
     return dashList
-
-
-# def genBetweenFrames(frameData1, frameData2, numFrames):
-# #     could optimize by doing linspace once for each node instead of once for each node for each frame
-#     betweenFrames = []
-
-#     for frameNum in range(numFrames):
-#         newFrame = {}
-#         for name in frameData1:
-#             newFrame[name] = np.linspace(frameData1[name],frameData2[name],numFrames)[frameNum]
-#         betweenFrames.append(newFrame)
-    
-#     return betweenFrames
