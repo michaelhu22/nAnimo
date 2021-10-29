@@ -1,3 +1,5 @@
+# appDynamic.py is currently a WIP, please run appClientside.py for the working visualization. Thanks!
+
 import dash
 import dash_cytoscape as cyto
 import dash_html_components as html
